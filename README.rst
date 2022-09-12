@@ -3,7 +3,7 @@ KE5RCS - D-Star Gateway
 
 :Author: Roie Black
 :Email: roie.black@gmail.com
-:Docs: rblack42.github.io/KE5RCS
+:Docs: https://rblack42.github.io/KE5RCS
 
 
 This site documents the setup of the D-Star repeater located in Walburg, Texas.
