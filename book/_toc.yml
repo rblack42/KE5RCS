@@ -8,6 +8,7 @@ options:
 chapters:
 - file: content/01-overview
 - file: content/G2/g2-introduction
+- file: content/G2/dstar-components
 - file: content/G3/g3-conversion
 
 - file: appendix/project-setup
