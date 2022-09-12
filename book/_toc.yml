@@ -1,0 +1,14 @@
+# Table of contents
+
+format: jb-book
+options:
+root: content/00-index
+options:
+  numbered: true
+chapters:
+- file: content/01-overview
+- file: content/g3-conversion
+
+- file: appendix/project-setup
+- file: content/bibliography
+

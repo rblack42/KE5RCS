@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Configuring a Second Linksys Router &mdash; D-Star Notes</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="D-Star Notes" href="../index.html"/>
+        <link rel="next" title="Gateway Network Setup" href="NetworkSetup.html"/>
+        <link rel="prev" title="D_Star Repeater Components" href="../DstarComponents.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> D-Star Notes
+          
+
+          
+            
+            <img src="../_static/dstar.jpg" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">D-Star Notes: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DstarComponents.html">D_Star Repeater Components</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuring a Second Linksys Router</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-the-airport-router">Configuring the AirPort Router</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-the-airport-extreme">Configuring the Airport Extreme</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-linksys-for-static-ip">Configuring Linksys for Static IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#router-lan-settings">Router LAN Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#port-forwarding">Port Forwarding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#communicating-with-the-server">Communicating with the Server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="NetworkSetup.html">Gateway Network Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/InstallSummary.html">Summary of Build Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/BootMedia.html">Preparing Boot Media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/CentOS_install.html">Installing CentOS for D-Star</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/DNSInstall.html">Gateway DNS Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../G2Software/GatewayInstall.html">Gateway Software Install Script</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Protocol/Packets.html">Voice and Data Packets</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Appendix/CentOS_VM.html">CentOS 5.11 VM Install</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">D-Star Notes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Configuring a Second Linksys Router</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Network/RouterSetup.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="configuring-a-second-linksys-router">
+<h1>Configuring a Second Linksys Router<a class="headerlink" href="#configuring-a-second-linksys-router" title="Permalink to this headline">¶</a></h1>
+<p>The installation of software on a D-Star gateway server requires configuring
+the gateway server network adapters as they will be set up at the final
+repeater site. The first time I went through the installation process, I
+reconfigured my home network to match the repeater site. This was a pain, and a
+process I do not want to repeat.</p>
+<p>A better solution is to use a second router in your home network and configure
+the network behind that new router to match the repeater site.</p>
+<p>My home router is an <cite>Apple Airport Extreme</cite> connected to my cable modem, and
+set to deliver 10.0.1.xxx IP addresses inside my home network.</p>
+<p>I connected a <cite>Linksys</cite> WRT54G router to the <cite>Airport Extreme</cite>. The cable runs from an
+available LAN port on the Airport to the WAN port on the <cite>Linksys</cite>. An
+available LAN port on the <cite>Linksys</cite> is connected to the Primary LAN port on the
+gateway server. This is what the setup looks like:</p>
+<img alt="Test Network" class="align-center" src="../_images/TestNetwork.png" />
+<div class="section" id="configuring-the-airport-router">
+<h2>Configuring the AirPort Router<a class="headerlink" href="#configuring-the-airport-router" title="Permalink to this headline">¶</a></h2>
+<p>There are two ways to set up the home network for the new router. The easiest is to
+let the Airport Extreme assign an IP address to the new router. The <cite>Linksys</cite>
+router is left in its default configuration and will get an IP address from the
+<cite>Airport</cite> router using DHCP. The address assigned using this scheme is
+generally not know in advance, but my <cite>Airport Extreme</cite> supports assigning a
+fixed IP address based on the MAC address of the attached device.</p>
+<p>The second way to set things up involves assigning a static IP address on the
+<cite>Linksys</cite> that is outside of the range of addresses the <cite>Airport Extreme</cite> will
+assign through DHCP. Since my router is set up to assign IP addresses in the
+10.0.1.1xx range, I chose an address of 10.0.1.204 for my setup.</p>
+<div class="section" id="configuring-the-airport-extreme">
+<h3>Configuring the Airport Extreme<a class="headerlink" href="#configuring-the-airport-extreme" title="Permalink to this headline">¶</a></h3>
+<p>If you choose to let the home router assign a fixed IP address using the DHCP
+protocol, you need to get the MAC address from the <cite>Linksys</cite> router. To do this,
+you will need to access the <cite>Linksys</cite> control panel.</p>
+<p>Hook up a laptop to the LAN side of the router and log into the administrator
+panel on the router. On my <cite>Linksys</cite>, the control panel status page showed this:</p>
+<img alt="Router status" class="align-center" src="../_images/RouterStatus.png" />
+<p>The Airport Extreme control panel has a controls to set the DHCP IP reservation
+using the MAC address. Check other routers to see if they support something
+similar.</p>
+</div>
+<div class="section" id="configuring-linksys-for-static-ip">
+<h3>Configuring Linksys for Static IP<a class="headerlink" href="#configuring-linksys-for-static-ip" title="Permalink to this headline">¶</a></h3>
+<p>To set a fixed IP address for the WAN side of the <cite>Linksys</cite> router, log into the
+control panel and navigate to the <code class="docutils literal"><span class="pre">Setup</span></code> menu. Here is how I configured the
+router:</p>
+<img alt="Router WAN settings" class="align-center" src="../_images/Router1.png" />
+<p>The gateway setting matches my Airport Extreme router, which will forward
+traffic from the <cite>Linksys</cite> to the Internet or other machines in my home
+network!</p>
+<p>To make it easier to change settings later, I also configured the <cite>Linksys</cite>
+router for external admin access. This opens up port 8080 on the external (WAN)
+IP address so you can access the router admin panel by opening a browser on a
+system in the home network and navigating to 10.0.1.204:8080. These settings
+are found on the <cite>Administration</cite> menu:</p>
+<img alt="External Admin Access Settings" class="align-center" src="../_images/Router1a.png" />
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You must change the default admin password on the router for this setting
+to be changed. I used a temporary password for testing.</p>
+</div>
+</div>
+<div class="section" id="router-lan-settings">
+<h3>Router LAN Settings<a class="headerlink" href="#router-lan-settings" title="Permalink to this headline">¶</a></h3>
+<p>Next, we need to configure the router for a static LAN IP address. Access the
+<code class="docutils literal"><span class="pre">Setup</span></code> menu. Under the <code class="docutils literal"><span class="pre">Network</span> <span class="pre">IP</span></code> settings area and set as follows:</p>
+<img alt="Router WAN address settings" class="align-center" src="../_images/Router2a.png" />
+<p>The address of 10.0.0.1 is required for the icon software setup.</p>
+</div>
+<div class="section" id="port-forwarding">
+<h3>Port Forwarding<a class="headerlink" href="#port-forwarding" title="Permalink to this headline">¶</a></h3>
+<p>We will want to access the new gateway server using HTTPS and SSH protocols,
+and access the router control panel. To make all of this happen, we need to set
+up port forwarding on the <code class="docutils literal"><span class="pre">Applications</span> <span class="pre">and</span> <span class="pre">Gaming</span></code> menu:</p>
+<img alt="Router WAN address settings" class="align-center" src="../_images/Router3.png" />
+</div>
+</div>
+<div class="section" id="communicating-with-the-server">
+<h2>Communicating with the Server<a class="headerlink" href="#communicating-with-the-server" title="Permalink to this headline">¶</a></h2>
+<p>With the repeater server attached to the <cite>Linksys</cite> router on one of the LAN
+ports, we will set up the <code class="docutils literal"><span class="pre">en0</span></code> network adapter so it gets a static IP
+address of 10.0.0.2 (required by the ICON software). Once this setup has been
+done, you should be able to reach the new server using SSH to 10.0.1.204, and
+access the web server using the HTTPS protocols.</p>
+<p>With this basic hardware setup completed, we can start configuring the gateway
+server.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="NetworkSetup.html" class="btn btn-neutral float-right" title="Gateway Network Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../DstarComponents.html" class="btn btn-neutral" title="D_Star Repeater Components" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Roie R. Black.
+      Last updated on Oct 24, 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

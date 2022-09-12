@@ -1,0 +1,12 @@
+# Mac
+.DS_Store
+
+# Python
+.direnv
+__pycache__
+*.py[cod]
+
+# Jupyter
+**/_build
+**/.ipynv_checkpoints
+**/unpublished

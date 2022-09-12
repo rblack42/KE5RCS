@@ -1,0 +1,385 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Preparing Boot Media &mdash; D-Star Notes</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="D-Star Notes" href="../index.html"/>
+        <link rel="next" title="Installing CentOS for D-Star" href="CentOS_install.html"/>
+        <link rel="prev" title="Summary of Build Process" href="InstallSummary.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> D-Star Notes
+          
+
+          
+            
+            <img src="../_static/dstar.jpg" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">D-Star Notes: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DstarComponents.html">D_Star Repeater Components</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Network/RouterSetup.html">Configuring a Second Linksys Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Network/NetworkSetup.html">Gateway Network Setup</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="InstallSummary.html">Summary of Build Process</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Preparing Boot Media</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#download-iso">Download ISO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-dvd-boot-disk">Build DVD Boot Disk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-usb-boot-drive">Build USB Boot Drive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-iso">1. Prepare the ISO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#copy-to-usb">2. Copy to USB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#booting-the-server">Booting the Server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CentOS_install.html">Installing CentOS for D-Star</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DNSInstall.html">Gateway DNS Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../G2Software/GatewayInstall.html">Gateway Software Install Script</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Protocol/Packets.html">Voice and Data Packets</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Appendix/CentOS_VM.html">CentOS 5.11 VM Install</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">D-Star Notes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Preparing Boot Media</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/GatewayServer/BootMedia.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="preparing-boot-media">
+<h1>Preparing Boot Media<a class="headerlink" href="#preparing-boot-media" title="Permalink to this headline">¶</a></h1>
+<p>For reasons best left for a later discussion, to set up a D-Star Gateway
+control server, you will need to install a 32-bit version of CentOS 5. The last
+release of that software was version 5.11 created in 2014.</p>
+<p>Assuming you plan on installing a D-Star Gateway server on a fresh machine, we
+need to create a media set suitable for booting the machine into the
+installation process. If your machine has a DVD drive, that means creating a
+bootable DVD. If not, you should be able to use a USB flash drive to boot the
+system, or connect a USB DVD drive.</p>
+<div class="section" id="download-iso">
+<h2>Download ISO<a class="headerlink" href="#download-iso" title="Permalink to this headline">¶</a></h2>
+<p>I downloaded the files needed from this link:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://centos-mirror.jchost.net/5.11/isos/i386/">http://centos-mirror.jchost.net/5.11/isos/i386/</a></li>
+</ul>
+</div></blockquote>
+<p>Although the full release takes two files, we really only need the first of
+these. Here is a command that will fetch this file on a Mac/Linux system, or
+download the file using your web browser:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ wget http://centos-mirror.jchost.net/5.11/isos/i386/CentOS-5.11-i386-bin-DVD-1of2.iso
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-dvd-boot-disk">
+<h2>Build DVD Boot Disk<a class="headerlink" href="#build-dvd-boot-disk" title="Permalink to this headline">¶</a></h2>
+<p>It used to be common for folks to use a DVD drive to load a new OS.
+Unfortunately, these are not so common on systems today. I do have a portable USB
+DVD drive I use as a backup when I really need to use a DVD.</p>
+<p>I usually try to set up a USB flash drive for installing new operating systems,
+but occasionally this does not work. On the server I am building now, the USB
+flash drive I created on my MacBook would not boot. Rather than worry about why,
+I decided to create a bootable DVD using my portable USB DVD drive.</p>
+<p>On the Mac this was super easy.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Plug in the DVD drive</li>
+<li>Right-click on the ISO filename</li>
+<li>Select <cite>Burn ISO to DVD Drive</cite>.</li>
+</ul>
+</div></blockquote>
+<p>The process took several minutes to burn and verify the DVD. Once that was
+completed, booting the server went smoothly!</p>
+</div>
+<div class="section" id="build-usb-boot-drive">
+<h2>Build USB Boot Drive<a class="headerlink" href="#build-usb-boot-drive" title="Permalink to this headline">¶</a></h2>
+<p>In case your system behaves better, here are the steps to build a bootable
+(maybe) USB drive on a Mac:</p>
+<div class="section" id="prepare-the-iso">
+<h3>1. Prepare the ISO<a class="headerlink" href="#prepare-the-iso" title="Permalink to this headline">¶</a></h3>
+<p>We downloaded the ISO earlier. I copy this file into a working directory so I
+do not risk losing it.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> Downloads
+$ cp CentOS-5.11-i386-bin-DVD-1of2.iso ~/_projects/D-Star/files
+$ <span class="nb">cd</span> ~/_projects/D-Star/files
+$ ls
+CentOS-5.11-i386-bin-DVD-1of2.iso
+</pre></div>
+</div>
+<p>Next, we convert the ISO file into a form the OS can copy to the USB drive:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ hdiutil convert -format UDRW -o ~/_projects/D-Star/files/CentOS5.11-32 ~/_projects/D-Star/files/CentOS-5.11-i386-bin-DVD-1of2.iso
+Reading CentOS_5.11_Final                <span class="o">(</span>Apple_ISO : <span class="m">0</span><span class="o">)</span>…
+...............................................................................
+Elapsed Time: <span class="m">24</span>.878s
+Speed: <span class="m">157</span>.7Mbytes/sec
+Savings: <span class="m">0</span>.0%
+created: /Users/rblack/_projects/D-Star/files/CentOS5.11-32.dmg
+</pre></div>
+</div>
+</div>
+<div class="section" id="copy-to-usb">
+<h3>2. Copy to USB<a class="headerlink" href="#copy-to-usb" title="Permalink to this headline">¶</a></h3>
+<p>For the next step, we need to mount the USB drive and figure out what device it
+ends up using. Plug in the flash drive and make sure you see the drive icon on
+the desktop. Then do this:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ diskutil list
+/dev/disk0 <span class="o">(</span>internal, physical<span class="o">)</span>:
+   <span class="c1">#:                       TYPE NAME                    SIZE       IDENTIFIER</span>
+   <span class="m">0</span>:      GUID_partition_scheme                        *500.3 GB   disk0
+   <span class="m">1</span>:                        EFI EFI                     <span class="m">209</span>.7 MB   disk0s1
+   <span class="m">2</span>:          Apple_CoreStorage MacPro2                 <span class="m">499</span>.4 GB   disk0s2
+   <span class="m">3</span>:                 Apple_Boot Recovery HD             <span class="m">650</span>.0 MB   disk0s3
+/dev/disk1 <span class="o">(</span>internal, virtual<span class="o">)</span>:
+   <span class="c1">#:                       TYPE NAME                    SIZE       IDENTIFIER</span>
+   <span class="m">0</span>:                  Apple_HFS MacPro2                +499.0 GB   disk1
+                                 Logical Volume on disk0s2
+                                 8A995A0D-E7F4-4659-A116-EDDB369312AA
+                                 Unencrypted
+/dev/disk2 <span class="o">(</span>external, physical<span class="o">)</span>:
+   <span class="c1">#:                       TYPE NAME                    SIZE       IDENTIFIER</span>
+   <span class="m">0</span>:     FDisk_partition_scheme                        *16.0 GB    disk2
+   <span class="m">1</span>:             Windows_FAT_32 Lexar                   <span class="m">16</span>.0 GB    disk2s1
+</pre></div>
+</div>
+<p>From this output, we see that the flash drive is mounted on <code class="docutils literal"><span class="pre">/dev/disk2</span></code>. It
+is important to get this right, since we will be wiping out all storage on this
+device. You do not want to zap your primary hard disk!</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ diskutil unmountDisk /dev/disk2
+Unmount of all volumes on disk2 was successful
+</pre></div>
+</div>
+<p>The next step does the actual copy:</p>
+<blockquote>
+<div>$ sudo dd if=~/_projects/D-Star/files/CentOS-5.11-32.dmg of=/dev/disk2 bs=1m
+Password:</div></blockquote>
+<p>This step takes a few minutes to complete, and there is no indication of
+progress. Eventually, it will complete.</p>
+</div>
+</div>
+<div class="section" id="booting-the-server">
+<h2>Booting the Server<a class="headerlink" href="#booting-the-server" title="Permalink to this headline">¶</a></h2>
+<p>Plug the USB flash drive or DVD drive into an available USB port, and power up
+the server. Almost all machines have a way to get to the BIOS on power-up, but
+exactly how is different for each machine.</p>
+<p>On the server I am building I pressed F12 to get to the boot menu. One of the
+choices of boot device should be your particular device. Select that device and
+start the boot process.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="CentOS_install.html" class="btn btn-neutral float-right" title="Installing CentOS for D-Star" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="InstallSummary.html" class="btn btn-neutral" title="Summary of Build Process" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Roie R. Black.
+      Last updated on Oct 24, 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

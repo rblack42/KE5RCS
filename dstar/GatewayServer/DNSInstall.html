@@ -1,0 +1,580 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Gateway DNS Setup &mdash; D-Star Notes</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="D-Star Notes" href="../index.html"/>
+        <link rel="next" title="Gateway Software Install Script" href="../G2Software/GatewayInstall.html"/>
+        <link rel="prev" title="Installing CentOS for D-Star" href="CentOS_install.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> D-Star Notes
+          
+
+          
+            
+            <img src="../_static/dstar.jpg" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">D-Star Notes: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DstarComponents.html">D_Star Repeater Components</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Network/RouterSetup.html">Configuring a Second Linksys Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Network/NetworkSetup.html">Gateway Network Setup</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="InstallSummary.html">Summary of Build Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BootMedia.html">Preparing Boot Media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CentOS_install.html">Installing CentOS for D-Star</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gateway DNS Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../G2Software/GatewayInstall.html">Gateway Software Install Script</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Protocol/Packets.html">Voice and Data Packets</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Appendix/CentOS_VM.html">CentOS 5.11 VM Install</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">D-Star Notes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Gateway DNS Setup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/GatewayServer/DNSInstall.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gateway-dns-setup">
+<h1>Gateway DNS Setup<a class="headerlink" href="#gateway-dns-setup" title="Permalink to this headline">¶</a></h1>
+<p>The gateway will run a DNS system that manages all D-Star IP address data. The
+configuration is set up using the following script:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">ds_bind_install:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155</pre></div></td><td class="code"><div class="highlight"><pre><span></span>#!/bin/sh
+
+#0 check directory
+if [ ! -f ./ds_bind-install ];then
+	echo &quot;** You must do this operation in same directory as &#39;dstar_gw-install&#39; (0)&quot; | tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true
+fi
+
+#1 whoami
+if [ `whoami` != &#39;root&#39; ];then
+	echo &quot;error: not root (1)&quot; | tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true	
+fi
+
+#1.1 delete temp-file
+if [ -d /tmp/bindinst ];
+then
+	rm -rf /tmp/bindinst
+	if [ $? != 0 ];then
+		echo &quot;error:Failed to remove temporary file (1.1)&quot;| tee -a ~/ds_bind-install.log
+	else
+		true
+	fi
+else
+	true
+fi
+
+#1.2 create temp-files(1)
+cp bindinst.tar.gz /tmp
+if [ $? != 0 ];then
+	echo &quot;error:Failed to copy ./bindinst.tar.gz to /tmp (1.2)&quot;| tee -a ~/ds_bind-install.log
+else
+	true
+fi
+
+#1.3 create temp-files(2)
+gunzip /tmp/bindinst.tar.gz
+if [ $? != 0 ];then
+	echo &quot;error:Failed to expand files from /tmp/bindinst.tar.gz (1.3)&quot;| tee -a ~/ds_bind-install.log
+else
+	true
+fi
+
+#1.4 create temp-files(3)
+tar -C /tmp -xvf /tmp/bindinst.tar 1&gt;/dev/null
+if [ $? != 0 ];then
+	echo &quot;error:Failed to expand files from /tmp/bindinst.tar  (1.4)&quot;| tee -a ~/ds_bind-install.log
+else
+	true
+fi
+
+#1.5 delete archive
+rm -f /tmp/bindinst.tar
+if [ $? != 0 ];then
+	echo &quot;error:Failed to remove /tmp/dsinst.tar (1.5)&quot;| tee -a ~/ds_bind-install.log
+else
+	true
+fi
+
+#2 Create group &#39;named&#39;
+groupadd named 2&gt;/dev/null
+case $? in
+	0)	;;
+	9)	;;
+	*)	echo &quot;error: Create group failed. (2)&quot; | tee -a ~/ds_bind-install.log
+		exit 1
+		;;
+esac
+
+
+#3 Over write setting-files(DNS)
+#     backup configuration-files
+echo &quot;use configured &#39;named.conf&#39;(DNS config)? (Y/n)&quot;
+read ans
+case ${ans} in
+	[yY])	if [ -f /var/named/chroot/etc/named.conf ];then
+				echo &quot;backup &#39;named.conf&#39; to &#39;named.conf.old&#39;.&quot;
+				cp -f /var/named/chroot/etc/named.conf /var/named/chroot/etc/named.conf.old
+				if [ $? != 0 ];then
+					echo &quot;error:backup &#39;named.conf&#39; to &#39;named.conf.old&#39;. (3-1)&quot;| tee -a ~/ds_bind-install.log
+					exit 1
+				else
+					true
+				fi
+			else
+				true
+			fi
+			cp -f /tmp/bindinst/named.conf /var/named/chroot/etc/named.conf
+			if [ $? != 0 ];then
+				echo &quot;error:Copy &#39;/tmp/dsinst/named.conf&#39; to &#39;/var/named/chroot/etc/named.conf&#39; failed. (3-2)&quot;| tee -a ~/ds_bind-install.log
+				exit 1
+			else
+				true
+			fi
+			;;
+	*)		exit 1
+			;;
+esac
+
+#4 change group
+chgrp named /var/named/chroot/etc/named.conf
+if [ $? != 0 ];then
+	echo &quot;error:Failed to &#39;chgrp named /var/named/chroot/etc/named.conf&#39;. (4)&quot;| tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true
+fi
+
+#5 Create database(DNS) for local D-STAR.
+#     copy nameddb.tar.gz
+cp -f /tmp/bindinst/nameddb.tar.gz /var/named/chroot/var/named
+if [ $? != 0 ];then
+	echo &quot;error:Copy &#39;/tmp/bindinst/nameddb.tar.gz&#39; to &#39;/var/named/chroot/var/named&#39; failed. (5)&quot;| tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true
+fi
+
+#6 unzip nameddb.tar.gz
+gunzip /var/named/chroot/var/named/nameddb.tar.gz
+if [ $? != 0 ];then
+	echo &quot;error:Expand files from &#39;/var/named/chroot/var/named/nameddb.tar.gz&#39; failed. (6)&quot;| tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true
+fi
+
+#7 Extract nameddb.tar
+tar --group named -C /var/named/chroot/var/named/ -xvf /var/named/chroot/var/named/nameddb.tar
+rm -f /var/named/chroot/var/named/nameddb.tar
+if [ $? != 0 ];then
+	echo &quot;error:Extract files from &#39;/var/named/chroot/var/named/nameddb.tar&#39; failed. (7)&quot;| tee -a ~/ds_bind-install.log
+	exit 1
+else
+	true
+fi
+
+#8 delete temp-files
+if [ -d /tmp/bindinst ];
+then
+	rm -rf /tmp/bindinst
+	if [ $? != 0 ];then
+		echo &quot;error:Failed to remove temporary file (8)&quot;| tee -a ~/ds_bind-install.log
+	else
+		true
+	fi
+else
+	true
+fi
+
+echo &quot;*** finished ***&quot;
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../G2Software/GatewayInstall.html" class="btn btn-neutral float-right" title="Gateway Software Install Script" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="CentOS_install.html" class="btn btn-neutral" title="Installing CentOS for D-Star" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Roie R. Black.
+      Last updated on Oct 24, 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

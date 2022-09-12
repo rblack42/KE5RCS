@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Voice and Data Packets &mdash; D-Star Notes</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="D-Star Notes" href="../index.html"/>
+        <link rel="next" title="CentOS 5.11 VM Install" href="../Appendix/CentOS_VM.html"/>
+        <link rel="prev" title="Gateway Software Install Script" href="../G2Software/GatewayInstall.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> D-Star Notes
+          
+
+          
+            
+            <img src="../_static/dstar.jpg" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">D-Star Notes: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DstarComponents.html">D_Star Repeater Components</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Network/RouterSetup.html">Configuring a Second Linksys Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Network/NetworkSetup.html">Gateway Network Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/InstallSummary.html">Summary of Build Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/BootMedia.html">Preparing Boot Media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/CentOS_install.html">Installing CentOS for D-Star</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GatewayServer/DNSInstall.html">Gateway DNS Setup</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../G2Software/GatewayInstall.html">Gateway Software Install Script</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Voice and Data Packets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#packet-fields">Packet Fields</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#radio-header">Radio Header</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bit-synchronization">Bit Synchronization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#frame-synchronization">Frame Synchronization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flag-bits">FLag Bits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Appendix/CentOS_VM.html">CentOS 5.11 VM Install</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">D-Star Notes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Voice and Data Packets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Protocol/Packets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="voice-and-data-packets">
+<h1>Voice and Data Packets<a class="headerlink" href="#voice-and-data-packets" title="Permalink to this headline">¶</a></h1>
+<img src="../_images/graphviz-17abcaf1d4e30575d07bb9a8b512484c2cde9157.png" alt="digraph dstar {
+    node[shape=record];
+    rankdir=&quot;LR&quot;;
+
+    packet2 [label=&quot;{&lt;fo&gt; Voice|&lt;f1&gt; \n |&lt;f2&gt; \n }&quot;];
+    packet2 [label=&quot;{&lt;fo&gt; Voice|&lt;f1&gt; \n |&lt;f2&gt; \n }&quot;];
+
+    {rankdir=same; packet1 packet2}
+
+    packet1-&gt;packet2 [dir=&quot;forward&quot;,arrowhead=&quot;normal&quot;,arrowtail=&quot;none&quot;];
+}" />
+<p>Here is a more complex example from one of the many tutorials on the Internet:</p>
+<img src="../_images/graphviz-46c99252a41a8f4bb2b8bab501ea77913ccf4186.png" alt="digraph structs {
+    node[shape=record]
+    rankdir=&quot;BT&quot;;
+    struct1 [label=&quot;&lt;f0&gt; Header|&lt;f1&gt; data|&lt;f2&gt; FCS&quot;];
+    struct2 [label=&quot;{&lt;f0&gt; Radio Header|{Bit\nSyn\n64bit|Frame\nSyn\n15bit|Flag\n1\n8bit|Flag\n2\n8bit|Flag\n3\n8bit|&lt;f1&gt; ID\n284bit|P_FCS\n16bit}}&quot; shape=Mrecord];
+    struct3 [label=&quot;{&lt;f0&gt;Data|{E_Len|{MAC Header|{SA|DA|TYPE}}|Data\nFrame}}&quot; shape=Mrecord];
+    struct4 [label=&quot;{&lt;f0&gt; FCS|{CRC}}&quot; shape=Mrecord];
+    struct5 [label=&quot;{&lt;f0&gt; ID|{Destination\nRepeater\nCallsign|Departure\nRepeater\nCallsign|Companion\nCallsign|Own\nCallsign}}&quot; shape=Mrecord];
+
+    rankdir=&quot;TB&quot;;
+    struct1:f0 -&gt; struct2:f0;
+    struct1:f1 -&gt; struct3:f0;
+    struct1:f2 -&gt; struct4:f0;
+    struct2:f1 -&gt; struct5:f0;
+}" />
+<p>For reference, here is the diagram from the specification document:</p>
+<img alt="../_images/dstar-frame.png" class="align-center" src="../_images/dstar-frame.png" />
+<div class="section" id="packet-fields">
+<h2>Packet Fields<a class="headerlink" href="#packet-fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="radio-header">
+<h3>Radio Header<a class="headerlink" href="#radio-header" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="bit-synchronization">
+<h4>Bit Synchronization<a class="headerlink" href="#bit-synchronization" title="Permalink to this headline">¶</a></h4>
+<p>This field is used by hardware to synchronize the transmission of packets. It
+consists of 64 bits sent as 16 repeated four bit patterns:</p>
+<blockquote>
+<div><ul class="simple">
+<li>GMSK: 1010</li>
+<li>QPSK: 1001</li>
+</ul>
+</div></blockquote>
+<p>These bits are transmitted left to right.</p>
+</div>
+<div class="section" id="frame-synchronization">
+<h4>Frame Synchronization<a class="headerlink" href="#frame-synchronization" title="Permalink to this headline">¶</a></h4>
+<p>THis field is a 15 bit pattern used to identify the start of a frame. The pattern is this:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Frame Syn: 111011001010000</li>
+</ul>
+</div></blockquote>
+<p>(I am sure there is a reason for this pattern, I need to check into that!)</p>
+</div>
+<div class="section" id="flag-bits">
+<h4>FLag Bits<a class="headerlink" href="#flag-bits" title="Permalink to this headline">¶</a></h4>
+<p>There are three flag bits:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Flag 1: 8 bits with these meanings</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Bit 7:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1 = data</li>
+<li>0 = voice</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Bit 6:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1 = signal goes through a repeater</li>
+<li>0 = local communications between terminals</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Bit 5:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1 indicates communications interruption exists</li>
+<li>0 = no interruption</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Bit 4:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1 = this is a control signal</li>
+<li>0 = Normal signal (voice or data)</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Bit 3:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1 = urgent priority (emergency communications)</li>
+<li>0 = normal priority</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Bits 0-2:</p>
+<blockquote>
+<div><ul class="simple">
+<li>111 = repeater station control (data contains control data)</li>
+<li>111 = auto reply</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Flag 2: 8 bits for future expalsion</p>
+</li>
+<li><p class="first">Flag 3: 8 bits used to match control functions t protocol versions (future use)</p>
+<blockquote>
+<div><ul class="simple">
+<li>101 = unused</li>
+<li>100 = resent flag (resend previous frame)</li>
+<li>011 = ACK flag</li>
+<li>010 = no reply flay (no reply is available)</li>
+<li>001 = relay unavailable flag (unsuitable relaying conditions)</li>
+<li>000 = NULL (no information)</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Appendix/CentOS_VM.html" class="btn btn-neutral float-right" title="CentOS 5.11 VM Install" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../G2Software/GatewayInstall.html" class="btn btn-neutral" title="Gateway Software Install Script" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Roie R. Black.
+      Last updated on Oct 24, 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
