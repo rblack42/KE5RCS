@@ -8,5 +8,5 @@ __pycache__
 
 # Jupyter
 **/_build
-**/.ipynv_checkpoints
+**/.ipynb_checkpoints
 **/unpublished

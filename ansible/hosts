@@ -1,3 +1,3 @@
 [servers]
-ke5rcs
+ke5rcs ansible_ssh_common_arg="-o KexAlgorithms=diffie-hellman-group1-sha1"
 
