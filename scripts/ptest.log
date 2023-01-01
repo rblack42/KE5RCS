@@ -1,68 +1,34 @@
-DEB [20220915-14:01:29.462] thr=1   paramiko.transport: starting thread (client mode): 0x62008b0
-DEB [20220915-14:01:29.462] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.11.0
-DEB [20220915-14:01:29.506] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-OpenSSH_4.3
-INF [20220915-14:01:29.507] thr=1   paramiko.transport: Connected (version 2.0, client OpenSSH_4.3)
-DEB [20220915-14:01:29.562] thr=1   paramiko.transport: === Key exchange possibilities ===
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: kex algos: diffie-hellman-group-exchange-sha1, diffie-hellman-group14-sha1, diffie-hellman-group1-sha1
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: server key: ssh-rsa, ssh-dss
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: client encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: server encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: client mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
-DEB [20220915-14:01:29.563] thr=1   paramiko.transport: server mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: client compress: none, zlib@openssh.com
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: server compress: none, zlib@openssh.com
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: client lang: <none>
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: server lang: <none>
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: kex follows: False
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: === Key exchange agreements ===
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: Kex: diffie-hellman-group-exchange-sha1
-DEB [20220915-14:01:29.564] thr=1   paramiko.transport: HostKey: ssh-rsa
-DEB [20220915-14:01:29.565] thr=1   paramiko.transport: Cipher: aes128-ctr
-DEB [20220915-14:01:29.565] thr=1   paramiko.transport: MAC: hmac-sha1
-DEB [20220915-14:01:29.565] thr=1   paramiko.transport: Compression: none
-DEB [20220915-14:01:29.565] thr=1   paramiko.transport: === End of kex handshake ===
-DEB [20220915-14:01:29.644] thr=1   paramiko.transport: Got server p (2048 bits)
-DEB [20220915-14:01:29.762] thr=1   paramiko.transport: kex engine KexGex specified hash_algo <built-in function openssl_sha1>
-DEB [20220915-14:01:29.762] thr=1   paramiko.transport: Switch to new keys ...
-DEB [20220915-14:01:29.763] thr=2   paramiko.transport: Adding ssh-rsa host key for [65.111.55.5]:5224: b'a18d863789b2d6029d5f4821ab60b364'
-DEB [20220915-14:01:29.806] thr=2   paramiko.transport: Trying discovered key b'739ac36fbcb5eb3b159122af18cd3c48' in /Users/rblack/.ssh/id_rsa
-DEB [20220915-14:01:29.888] thr=1   paramiko.transport: userauth is OK
-DEB [20220915-14:01:29.888] thr=1   paramiko.transport: Finalizing pubkey algorithm for key of type 'ssh-rsa'
-DEB [20220915-14:01:29.889] thr=1   paramiko.transport: Our pubkey algorithm list: ['rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa']
-DEB [20220915-14:01:29.889] thr=1   paramiko.transport: Server did not send a server-sig-algs list; defaulting to our first preferred algo ('rsa-sha2-512')
-DEB [20220915-14:01:29.889] thr=1   paramiko.transport: NOTE: you may use the 'disabled_algorithms' SSHClient/Transport init kwarg to disable that or other algorithms if your server does not support them!
-INF [20220915-14:01:29.940] thr=1   paramiko.transport: Authentication (publickey) failed.
-DEB [20220915-14:05:47.540] thr=1   paramiko.transport: starting thread (client mode): 0x11654970
-DEB [20220915-14:05:47.541] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.11.0
-DEB [20220915-14:05:47.597] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-OpenSSH_4.3
-INF [20220915-14:05:47.597] thr=1   paramiko.transport: Connected (version 2.0, client OpenSSH_4.3)
-DEB [20220915-14:05:47.640] thr=1   paramiko.transport: === Key exchange possibilities ===
-DEB [20220915-14:05:47.640] thr=1   paramiko.transport: kex algos: diffie-hellman-group-exchange-sha1, diffie-hellman-group14-sha1, diffie-hellman-group1-sha1
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: server key: ssh-rsa, ssh-dss
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: client encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: server encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: client mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: server mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: client compress: none, zlib@openssh.com
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: server compress: none, zlib@openssh.com
-DEB [20220915-14:05:47.641] thr=1   paramiko.transport: client lang: <none>
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: server lang: <none>
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: kex follows: False
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: === Key exchange agreements ===
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: Kex: diffie-hellman-group-exchange-sha1
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: HostKey: ssh-rsa
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: Cipher: aes128-ctr
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: MAC: hmac-sha1
-DEB [20220915-14:05:47.642] thr=1   paramiko.transport: Compression: none
-DEB [20220915-14:05:47.643] thr=1   paramiko.transport: === End of kex handshake ===
-DEB [20220915-14:05:47.736] thr=1   paramiko.transport: Got server p (2048 bits)
-DEB [20220915-14:05:47.864] thr=1   paramiko.transport: kex engine KexGex specified hash_algo <built-in function openssl_sha1>
-DEB [20220915-14:05:47.864] thr=1   paramiko.transport: Switch to new keys ...
-DEB [20220915-14:05:47.865] thr=2   paramiko.transport: Adding ssh-rsa host key for [65.111.55.5]:5224: b'a18d863789b2d6029d5f4821ab60b364'
-DEB [20220915-14:05:47.909] thr=2   paramiko.transport: Trying discovered key b'739ac36fbcb5eb3b159122af18cd3c48' in /Users/rblack/.ssh/id_rsa
-DEB [20220915-14:05:47.989] thr=1   paramiko.transport: userauth is OK
-DEB [20220915-14:05:47.989] thr=1   paramiko.transport: Finalizing pubkey algorithm for key of type 'ssh-rsa'
-DEB [20220915-14:05:47.989] thr=1   paramiko.transport: Our pubkey algorithm list: ['ssh-rsa']
-DEB [20220915-14:05:47.989] thr=1   paramiko.transport: Server did not send a server-sig-algs list; defaulting to our first preferred algo ('ssh-rsa')
-DEB [20220915-14:05:47.989] thr=1   paramiko.transport: NOTE: you may use the 'disabled_algorithms' SSHClient/Transport init kwarg to disable that or other algorithms if your server does not support them!
-INF [20220915-14:05:48.088] thr=1   paramiko.transport: Authentication (publickey) successful!
+DEB [20220916-11:00:03.772] thr=1   paramiko.transport: starting thread (client mode): 0xeb4c9d0
+DEB [20220916-11:00:03.772] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.11.0
+DEB [20220916-11:00:03.815] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-OpenSSH_4.3
+INF [20220916-11:00:03.815] thr=1   paramiko.transport: Connected (version 2.0, client OpenSSH_4.3)
+DEB [20220916-11:00:03.859] thr=1   paramiko.transport: === Key exchange possibilities ===
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: kex algos: diffie-hellman-group-exchange-sha1, diffie-hellman-group14-sha1, diffie-hellman-group1-sha1
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: server key: ssh-rsa, ssh-dss
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: client encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: server encrypt: aes128-ctr, aes192-ctr, aes256-ctr, arcfour256, arcfour128, aes128-cbc, 3des-cbc, blowfish-cbc, cast128-cbc, aes192-cbc, aes256-cbc, arcfour, rijndael-cbc@lysator.liu.se
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: client mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: server mac: hmac-md5, hmac-sha1, hmac-ripemd160, hmac-ripemd160@openssh.com, hmac-sha1-96, hmac-md5-96
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: client compress: none, zlib@openssh.com
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: server compress: none, zlib@openssh.com
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: client lang: <none>
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: server lang: <none>
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: kex follows: False
+DEB [20220916-11:00:03.860] thr=1   paramiko.transport: === Key exchange agreements ===
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: Kex: diffie-hellman-group-exchange-sha1
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: HostKey: ssh-rsa
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: Cipher: aes128-ctr
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: MAC: hmac-sha1
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: Compression: none
+DEB [20220916-11:00:03.861] thr=1   paramiko.transport: === End of kex handshake ===
+DEB [20220916-11:00:03.992] thr=1   paramiko.transport: Got server p (2048 bits)
+DEB [20220916-11:00:04.114] thr=1   paramiko.transport: kex engine KexGex specified hash_algo <built-in function openssl_sha1>
+DEB [20220916-11:00:04.115] thr=1   paramiko.transport: Switch to new keys ...
+DEB [20220916-11:00:04.115] thr=2   paramiko.transport: Adding ssh-rsa host key for [65.111.55.5]:5224: b'a18d863789b2d6029d5f4821ab60b364'
+DEB [20220916-11:00:04.157] thr=2   paramiko.transport: Trying discovered key b'739ac36fbcb5eb3b159122af18cd3c48' in /Users/rblack/.ssh/id_rsa
+DEB [20220916-11:00:04.249] thr=1   paramiko.transport: userauth is OK
+DEB [20220916-11:00:04.250] thr=1   paramiko.transport: Finalizing pubkey algorithm for key of type 'ssh-rsa'
+DEB [20220916-11:00:04.250] thr=1   paramiko.transport: Our pubkey algorithm list: ['ssh-rsa']
+DEB [20220916-11:00:04.250] thr=1   paramiko.transport: Server did not send a server-sig-algs list; defaulting to our first preferred algo ('ssh-rsa')
+DEB [20220916-11:00:04.250] thr=1   paramiko.transport: NOTE: you may use the 'disabled_algorithms' SSHClient/Transport init kwarg to disable that or other algorithms if your server does not support them!
+INF [20220916-11:00:04.344] thr=1   paramiko.transport: Authentication (publickey) successful!

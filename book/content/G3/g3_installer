@@ -1,0 +1,683 @@
+#!/bin/bash
+#
+# 04-Nov-2016 | NJ6N | ICOM G3 Gateway Installer
+# 08-Nov-2016 | NJ6N | Updated to handle backup being manually copied to new gateway server ** must have correct filename **
+# 11-Nov-2016 | NJ6N | Added rp2c query to validate rp2c configuration using AA4RCs rp2c query tool
+# 31-Dec-2016 | NJ6N | Updated verbiage 
+# 01-Jan-2017 | NJ6N | Unzip G3.zip if found, otherwise look for G3 RPMs directly.
+# 02-Jan-2017 | NJ6N | Install AA4RC dstar tools (dstarpasswd, etc.)
+# 02-Jan-2017 | NJ6N | Install AE5PLs DstarMonitor application if backup contains dstarmonitor.properties file
+# 05-Jan-2017 | NJ6N | Require Gateway Callsign even if reconfiguring / already set - in case of erroneous call entered
+# 06-Jan-2017 | NJ6N | Changed installed name for dsm back to "dsm"
+# 09-Jan-2017 | NJ6N | Temporarily disable iptables prior to running IP Port Check
+# 10-Jan-2017 | NJ6N | Do not exit upon Port test failure - to facilitate off-site restorations
+# 16-Jan-2017 | NJ6N | Updated to allow for new installation without backup file present
+# 05-Feb-2017 | NJ6N | Install PGDG repository directly - not from dstar_gw_pgp RPM
+# 28-Aug-2017 | NJ6N | Bug fix implemented for "-f is true when G3ZIP variable is not set"
+# 28-Aug-2017 | NJ6N | Skip check for Icom RPMs for reconfiguration runs
+# 12-Nov-2017 | NJ6N | Create DSM directory if it does not exist already
+# 05-Aug-2018 | NJ6N | Added libpcap to installed RPMs
+# 05-Aug-2018 | NJ6N | Updated DStarMonitor GWIntf interface to ZR_ETHIFNAME (Controller interface)
+# 05-Aug-2018 | NJ6N | Modified RECONFIG logic to use current dstarmonitor.properties for DSM
+# 17-Apr-2019 | NJ6N | Bug fix - checking for existence of g3.zip
+# 01-Dec-2019 | NJ6N | Bugf fix - cd /tmp before installing DSM 
+# 07-Aug-2020 | NJ6N | Added postgresql-libs.i686 to the list of packages that are installed
+# 29-Dec-2020 | NJ6N | use https to access dsync
+# 14-Feb-2021 | NJ6N | Install deprecated version of postgres from alternate source for Icom dependency
+# 14-Jan-2022 | NJ6N | Installs G3 Beta that supports current Postgres package
+# 05-May-2022 | NJ6N | Updated Dsync reporting for version 3.10
+# 07-May-2022 | NJ6N | Replaced yum "install" with "localinstall" to avoid error from already existing packages
+# 18-May-2022 | NJ6N | Updated cleanup of files
+# 21-May-2022 | NJ6N | Updated Dsync to use dsync.dstarusers.org domain name
+# 29-Aug-2022 | NJ6N | Bug fix in NJ6N.COM URL
+#
+VERSION=3.4.3
+# 
+RECONFIG=false
+SKIP_PORTTEST=0
+export GW_IP=10.0.0.1
+export ZR_IP=172.16.0.1
+#
+KERNEL=`/bin/uname -r`;
+CURL="/usr/bin/curl --connect-timeout 120 --max-time 360"
+ROOTG3=rootg3.dstarusers.org
+BACKDIR=/dstar/backups
+#
+# ICOM G3
+#
+DSTARGW=/opt/products/dstar/dstar_gw
+DSIPSVD=$DSTARGW/dsipsvd/dsipsvd
+DSGWD=$DSTARGW/dsgwd/dsgwd
+DSGWDCONF=$DSTARGW/dsgwd/dsgwd.conf
+DBDELREC=$DSTARGW/dsipsvd/dbdelrec
+DSICONF=$DSTARGW/dsipsvd/dsipsvd.conf
+#
+# DSync 
+#
+DSYNC=https://dsync.dstarusers.org
+UPDATE_URL=$DSYNC/dsync.php
+SCR_PATH=/dstar/scripts
+SCHED=gw_schedule_g310
+UPDATER=update_scripts_g310
+#
+# AA4RC Utils
+#
+TOOLS=/dstar/tools
+DPLUSCONF=$TOOLS/dplus.conf
+IPPORTTEST=IPPortTestClient.bin
+OPENDSTAR=http://www.opendstar.org/tools
+#
+# DStarMonitor 
+#
+DSM_DIR=/opt/dstarmon
+DSM_BAK=/opt/dstarmon-`date +%Y%m%d-%H%M%S`
+DSM_PROP=dstarmonitor.properties
+DSM_CONF=$DSM_DIR/$DSM_PROP
+DSM_INIT=dsm4_init
+DSMTAR=dstarmonitor43.tar.gz
+#
+# Postgres
+# 
+PG_URL=https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+#
+
+if [ $EUID != 0 ] ; then
+    echo "Installation script must be run as root.  Aborting!" | tee -a $LOGF
+    exit
+fi
+
+CWD=`/bin/pwd`
+DATE=`date "+%y%m%d-%H%M%S"`
+LOGF=/tmp/G3-Installation-$DATE.log
+G3ZIP=`find /tmp -iname g3.zip`
+
+# 
+# Parse command line arguments
+#
+
+while [[ $# -gt 0 ]]; do
+    argv="$1"
+    case $argv in
+        -n|--noporttest)
+	    SKIP_PORTTEST=true
+	    ;;
+        -d|--debug)
+	    DEBUG=true
+	    ;;
+        -g|--gwip)
+	    GW_IP=$2
+	    shift
+	    ;;
+        -r|--reconfigure)
+	    RECONFIG=true
+	    ;;
+        -z|--zrip)
+	    export ZR_IP=$2
+	    shift
+	    ;;
+	*)
+	    echo Unknown Option: $argv
+	    echo -e "\n\t Usage: $0 -n|--noporttest -d|--debug -g|--gwip {router IP} -z|--zrip {rp2c IP} -r|--reconfigure\n"
+	    exit
+	    ;;
+    esac
+    shift
+done
+
+#
+echo `date` "ICOM G3 Gateway Upgrade Installer, Version = $VERSION"
+echo `date` "$0 Starting, Log file = $LOGF" | tee -a $LOGF
+
+if [ "$CWD" != "/tmp" ]; then
+    cd /tmp
+fi
+
+#
+# Make sure we can find the ICOM RPMs directly, or the G3.zip archive
+#
+
+if [ "$RECONFIG" != "true" ]; then
+
+    if [ ! -z $G3ZIP ]; then
+	if [ -f $G3ZIP ]; then
+	    echo `date` "Found G3.zip Archive" | tee -a $LOGF
+	    echo `date` "Installing \"unzip\" utility and unzipping..." | tee -a $LOGF
+	    /bin/yum -y install unzip >> $LOGF 2>&1    
+	    if [ "$?" != "0" ]; then
+		echo `date` "Error installing unzip" | tee -a $LOGF
+	    fi
+	    /bin/unzip -o $G3ZIP >> $LOGF 2>&1
+	    if [ "$?" != "0" ]; then
+		echo `date` "Error unzipping $G3ZIP archive." | tee -a $LOGF
+	    fi
+	fi	
+    else
+	echo "G3 ZIP archive not found, looking for G3 RPMs" | tee -a $LOGF
+    fi
+    
+    GW3RPM=`find . -name dstar_gw-\*.el7.x86_64.rpm`
+    GWGPG=`ls -1 dstar_gw_gpg*.noarch.rpm`
+
+    if [ -z $GW3RPM ]; then
+	echo "ICOM G3 RPM not found, Aborting!"
+	exit
+    fi
+    
+    if [ -z $GWGPG ]; then
+	echo "ICOM PGP Key RPM not found, Aborting!"
+	exit
+    fi
+fi
+
+#
+# functions
+# 
+
+function stop () {
+    /bin/systemctl stop dstar_gw
+    /bin/systemctl stop dplus
+    /bin/systemctl stop tomcat
+    /bin/systemctl stop dsm
+}
+
+function start () {
+    /bin/systemctl start dstar_gw
+    /bin/systemctl start dplus
+    /bin/systemctl start tomcat
+    /bin/systemctl start dsm
+}
+
+function key_val () {
+    VAR=$1
+    FILE=$2
+    local VAL=`egrep -e ^$VAR $FILE | sed -e 's/ //g' | awk -F"=" '{print $2}' |sed -e 's/\r//'`;
+    echo $VAL
+}
+
+#
+# Install required packages here
+# 
+
+#
+# Create /dstar/tools directory
+# 
+mkdir -p $TOOLS
+
+echo -n `date` "Downloading IP Port Test Utility ... " | tee -a $LOGF
+$CURL $OPENDSTAR/G3/$IPPORTTEST > $TOOLS/$IPPORTTEST 2>/dev/null
+echo "DONE"
+
+if [ "$?" != "0" ]; then
+    echo "Warning - Unable to $CURL $OPENDSTAR/G3/$IPPORTTEST" | tee -a $LOGF
+else
+    chmod 755 $TOOLS/$IPPORTTEST
+fi
+
+echo `date` "Installing required packages " | tee -a $LOGF
+
+PACKAGES="policycoreutils-python glib2.i686 ntp net-tools openssl098e.i686 openssl-libs.i686 libpcap postgresql-libs.i686 wget"
+/bin/yum -y install $PACKAGES >> $LOGF 2>&1
+
+if [ "$?" != "0" ]; then
+    echo `date` "## ERROR - Unable to install $PACKAGES with yum, aborting." | tee -a $LOGF
+    exit
+fi
+
+# 
+# Start ntp time service
+#
+systemctl enable ntpd.service | tee -a $LOGF
+
+#
+# Stop daemons if this is a reconfiguration run
+#
+
+if [ "$RECONFIG" == "true" ]; then
+    echo `date` "Stopping DSTAR daemons before re-configuration "
+    stop
+fi
+
+#
+# Run IP Port Test to make sure ports are forwarded correctly
+#
+
+if [ $SKIP_PORTTEST != "true" ]; then
+    echo `date` "Running IP port test to validate router port forwarding configuration:"  | tee -a $LOGF
+
+    if [ -x $TOOLS/$IPPORTTEST ]; then
+	echo `date` "Stopping firewall for port forwarding test" | tee -a $LOGF
+	systemctl stop firewalld | tee -a $LOGF
+
+	$TOOLS/$IPPORTTEST >& /tmp/porttest.log
+	if grep --quiet FAILED /tmp/porttest.log; then
+	    echo `date` "FAILED IP Port forwarding test!" | tee -a $LOGF
+	    echo -e "\n\t#### You MUST correct the following port forwarding problem before your gateway will be functional: ####\n" | tee -a $LOGF
+	    cat /tmp/porttest.log
+	    echo | tee -a $LOGF
+	    /bin/stty sane
+	else
+	    echo `date` "Gateway router has passed the port forwarding test" | tee -a $LOGF
+	fi
+    else
+	echo `date` "$TOOLS/$IPPORTTEST not installed, or not executable!" | tee -a $LOGF
+    fi
+else
+    echo `date` "Skipping IP Port Test" | tee -a $LOGF
+fi
+
+#
+# Install rp2c utility
+#
+
+$CURL $OPENDSTAR/G2/rp2c > $TOOLS/rp2c 2>/dev/null
+if [ "$?" != "0" ]; then
+    echo "Warning - Unable to $CURL $OPENDSTAR/G2/rp2c utility"
+else
+    chmod 755 $TOOLS/rp2c
+    echo `date` "Please confirm your rp2c configuration is correct" | tee -a $LOGF
+    $TOOLS/rp2c -a -i $ZR_IP 2>/dev/null | tee -a $LOGF
+fi
+
+#
+# Install the ICOM Software
+#
+
+if [ "$RECONFIG" != "true" ]; then
+
+    echo `date` Installing ICOM G3 Gateway Software | tee -a $LOGF
+
+    echo `date` Installing $GWGPG | tee -a $LOGF
+    /bin/rpm --force -ivh $GWGPG >> $LOGF 2>&1
+   
+    if [ "$?" != "0" ]; then
+	echo "Error installing $GWGPG, check $LOGF for more information" | tee -a $LOGF
+	exit
+    fi
+# 
+# Now remove the package, leaving the ICOM GPG key
+#
+    GWGPG_RPM=`echo $GWGPG | sed s/.rpm//`
+
+    echo `date` "Removing $GWGPG_RPM ... " | tee -a $LOGF
+    /bin/rpm -e $GWGPG_RPM >> $LOGF 2>&1
+
+#
+# Install Posgres
+#
+    echo `date` "Installing Postgres" | tee -a $LOGF
+
+    yum -y localinstall $PG_URL >> $LOGF 2>&1
+	if [ "$?" != "0" ]; then
+	    echo "Error installing Postgres, check $LOGF for more information" | tee -a $LOGF
+	    exit
+	fi
+#
+# Install G3 RPM
+#
+    echo `date` "Installing $GW3RPM (this can take up to 5 minutes)"  | tee -a $LOGF
+    /bin/yum -y localinstall $GW3RPM >> $LOGF 2>&1 
+    
+    if [ "$?" != "0" ]; then
+	echo "Error installing $GW3RPM, check $LOGF for more information" | tee -a $LOGF
+	exit
+    fi
+fi
+#
+# Update ZR_CALLSIGN in dsipsvd.conf
+# 
+CUR_ZR_CALLSIGN=$(key_val ZR_CALLSIGN $DSICONF)
+ZR_CALLSIGN=""
+
+while [ -z $ZR_CALLSIGN ]; do
+    echo 
+    echo -n "Please enter gateway callsign, e.g. AB9CDE (enter Q to quit): [$CUR_ZR_CALLSIGN] " | tee -a $LOGF
+    read ZR_CALLSIGN
+    echo | tee -a $LOGF
+
+    if [ "$ZR_CALLSIGN" == "Q" ] || [ "$ZR_CALLSIGN" == "q" ]; then
+        exit
+    elif [ -z $ZR_CALLSIGN ] && [ ! -z $CUR_ZR_CALLSIGN ]; then
+        ZR_CALLSIGN=$CUR_ZR_CALLSIGN
+    elif [ -z $ZR_CALLSIGN ]; then
+        echo | tee -a $LOGF
+        echo " Gateway Call Sign MUST be specified!" | tee -a $LOGF
+    fi
+done
+
+ZR_CALLSIGN=`echo $ZR_CALLSIGN | tr [a-z] [A-Z]`
+echo `date` "Setting ZR_CALLSIGN = $ZR_CALLSIGN in $DSICONF" | tee -a $LOGF
+/bin/sed -i -e "s/^ZR_CALLSIGN.*=.*/ZR_CALLSIGN=$ZR_CALLSIGN/" $DSICONF
+
+#
+# Configure TRUST_SERVER in dsipsvd.conf
+# 
+
+TRUST_SERVER=$(key_val TRUST_SERVER $DSICONF)
+TRUST_SERVER=`echo $TRUST_SERVER | tr [A-Z] [a-z]` | tee -a $LOGF
+
+if [ "$TRUST_SERVER" != "$ROOTG3" ]; then
+    echo `date` "Setting TRUST_SERVER = $ROOTG3 in $DSICONF" | tee -a $LOGF
+    /bin/sed -i -e "s/^TRUST_SERVER.*=.*/TRUST_SERVER=$ROOTG3/" $DSICONF
+else
+    echo `date` "Valid TRUST_SERVER: $TRUST_SERVER" | tee -a $LOGF
+fi
+
+#
+# update dsgwd.conf
+#
+/bin/ping -c 2 $GW_IP >> $LOGF 2>&1
+if [ "$?" != "0" ]; then
+    echo "Network interface at $GW_IP appears to be down, Aborting Installation!" | tee -a $LOGF
+    exit
+fi
+
+GW_ETHIFNAME=`/usr/sbin/ip neigh | grep $GW_IP | head -1 | awk '{print $3}'`
+GW_IFCFG=$(key_val GW_ETHIFNAME $DSGWDCONF)
+
+if [ "$GW_IFCFG" != "$GW_ETHIFNAME" ]; then
+    echo `date` "Setting GW_ETHIFNAME=$GW_ETHIFNAME" | tee -a $LOGF
+    /bin/sed -i -e "s/^GW_ETHIFNAME.*=.*/GW_ETHIFNAME=$GW_ETHIFNAME/" $DSGWDCONF
+else
+    echo `date` "Valid GW_ETHINFNAME: $GW_IFCFG" | tee -a $LOGF
+fi
+
+ZR_ADDR=$(key_val ZR_ADDR $DSGWDCONF)
+
+if [ "$ZR_ADDR" != "$ZR_IP" ]; then
+    echo `date` "Setting ZR_ADDR = $ZR_IP in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/^ZR_ADDR.*=.*/ZR_ADDR=$ZR_IP/" $DSGWDCONF
+else
+    echo `date` "Valid ZR_ADDR: $ZR_ADDR" | tee -a $LOGF
+fi
+
+DNS_ADDR=$(key_val DNS_ADDR $DSGWDCONF)
+
+if [ "$DNS_ADDR" != "$GW_IP" ]; then
+    echo `date` "Setting DNS_ADDR = $GW_IP in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/DNS_ADDR.*=.*/DNS_ADDR=$GW_IP/" $DSGWDCONF
+else
+    echo `date` "Valid DNS_ADDR: $DNS_ADDR" | tee -a $LOGF
+fi
+
+#
+# DNS_MAC in dsgwd.conf
+#
+
+DNS_MAC=$(key_val DNS_MAC $DSGWDCONF)
+
+ARP_ENTRY=`/sbin/ip neigh | grep $GW_IP | head -1 | awk '{print $5}' | sed s/:/-/g`
+LEN=${#ARP_ENTRY}
+
+if [ -z $ARP_ENTRY ] || [ "$LEN" != "17" ]; then
+    echo `date` "Unable to determine MAC address for $GW_IP, aborting!" | tee -a $LOGF
+    exit
+fi
+
+if [ "$DNS_MAC" != "$ARP_ENTRY" ]; then
+    echo `date` "Setting DNS_MAC = $ARP_ENTRY in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/DNS_MAC.*=.*/DNS_MAC=$ARP_ENTRY/" $DSGWDCONF
+else
+    echo `date` "Valid DNS_MAC: $DNS_MAC = $ARP_ENTRY" | tee -a $LOGF
+fi
+
+#
+# ZR_CALLSIGN in dsgwd.conf
+# 
+echo `date` "Setting DSGWD ZR_CALLSIGN = $ZR_CALLSIGN in $DSGWDCONF" | tee -a $LOGF
+/bin/sed -i -e "s/^ZR_CALLSIGN.*=.*/ZR_CALLSIGN=$ZR_CALLSIGN/" $DSGWDCONF
+
+#
+# Install gateway scheduler script
+#
+
+echo `date` "Installing gw_schedule and updater scripts" | tee -a $LOGF
+mkdir -p $SCR_PATH
+
+$CURL $DSYNC/$SCHED > $SCR_PATH/$SCHED 2>/dev/null
+chmod 755 $SCR_PATH/$SCHED
+
+$CURL $DSYNC/$UPDATER > $SCR_PATH/$UPDATER 2>/dev/null
+chmod 755 $SCR_PATH/$UPDATER
+
+#
+# Install new crontab
+#
+echo `date` "Installing DSync crontab" | tee -a $LOGF
+$CURL $DSYNC/g310_dsync_crontab > /etc/cron.d/dsync 2>/dev/null
+
+#
+# Download G2 backup 
+#
+
+NO_BACKUP=0
+
+/bin/echo
+/bin/echo -n "Enter the keyword that you used when creating the backup of G2 (not the gateway call), <RETURN> for none: "
+read KEYWORD
+
+if [ -z $KEYWORD ]; then
+    NO_BACKUP=1
+    echo `date` "Proceeding without backup file" | tee -a $LOGF
+else
+    BACKUP=$ZR_CALLSIGN-$KEYWORD-backup.tgz
+    
+    if [ -f $BACKUP ]; then
+	echo `date` "Using backup file: $BACKUP" | tee -a $LOGF
+    else
+	echo `date` "Downloading backup ($BACKUP) from backup site" | tee -a $LOGF
+	$CURL -O https://nj6n.com/g2_gw_backups/$BACKUP 2>/dev/null
+	
+	RETVAL=`/bin/tar -tzf $BACKUP`
+	if [ "$?" != 0 ]; then
+	    NO_BACKUP=1
+	    echo `date` "Error downloading $BACKUP from backup server" | tee -a $LOGF
+	    echo `date` "You will need to manually restore your unsync_user_mng database table" | tee -a $LOGF
+	fi
+    fi
+fi
+
+# 
+# Import unsync_user_mng table from backup only if it contains zero records
+#
+
+MNG_COUNT=`/bin/psql -U dstar dstar_global -c 'select count(*) from unsync_user_mng;'|grep -v 'count\|-\|row'`
+
+if [ $MNG_COUNT == 0 ]; then
+    echo `date` "MNG Table is empty, data will be restored from backup or initialized using the add_user_mng script from ICOM" | tee -a $LOGF
+
+    if [ $NO_BACKUP == 0 ]; then
+	echo `date` "Extracting unsync_user_mng data from backup file" | tee -a $LOGF
+	/bin/tar -xzvf $BACKUP /dstar/backups >> $LOGF 2>&1
+	UNSYNC_USER_MNG=`ls dstar/backups/unsync_user_mng*`
+
+	if [ -f $UNSYNC_USER_MNG ]; then
+	    echo `date` "unsync_user_mng table data found, loading into database..." | tee -a $LOGF
+	    cp -f $UNSYNC_USER_MNG /tmp/unsync_user_mng
+
+cat << EOS | psql -U dstar dstar_global | tee -a $LOGF
+  TRUNCATE unsync_user_mng;
+  VACUUM unsync_user_mng;
+  COPY unsync_user_mng FROM '/tmp/unsync_user_mng' DELIMITER ',';
+  \q
+EOS
+	else
+	    echo `date` "unsync_user_mng table data not found!" | tee -a $LOGF
+	fi
+    fi
+fi
+
+MNG_COUNT=`/bin/psql -U dstar dstar_global -c 'select count(*) from unsync_user_mng;'|grep -v 'count\|-\|row'`
+if [ $MNG_COUNT == 0 ]; then
+    echo `date` "Assuming this is a new gateway installation, running add_user_mng.sh script to set up GW Administrator entry" | tee -a $LOGF
+    /bin/bash $DSTARGW/dsipsvd/add_user_mng.sh  | tee -a $LOGF
+else 
+    echo `date` "$MNG_COUNT records found in MNG table" | tee -a $LOGF
+fi
+
+#
+# Install dplus
+#
+
+echo `date` "Installing dplus  " | tee -a $LOGF
+
+# create dv audio directory
+mkdir -p /dstar/dv
+
+# Download / run dplus installer
+$CURL -O $OPENDSTAR/G2/dplus-install-g2.sh >> $LOGF 2>&1
+/bin/bash ./dplus-install-g2.sh >> $LOGF 2>&1
+
+# 
+# Update dplus interfaces
+#
+echo `date` "Setting dplus external ethernet = $GW_ETHIFNAME in $DPLUSCONF" | tee -a $LOGF
+/bin/sed -i -e "s/^externalethernet.*=.*/externalethernet=$GW_ETHIFNAME/" $DPLUSCONF
+
+ZR_ETHIFNAME=`ip neigh | grep $ZR_IP | head -1 | awk '{print $3}'`
+
+echo `date` "Setting dplus internal ethernet = $ZR_ETHIFNAME in $DPLUSCONF" | tee -a $LOGF
+/bin/sed -i -e "s/^internalethernet.*=.*/internalethernet=$ZR_ETHIFNAME/" $DPLUSCONF
+
+# Update SELINUX to allow symbolic links from /dstar/tmp
+/sbin/semanage fcontext -a -t httpd_sys_content_t /dstar/tmp >> $LOGF 2>&1
+
+#
+# Install AA4RC Tools
+#
+echo `date` "Installing AA4RC dstar utilities into /dstar/tools ..." | tee -a $LOGF
+UTILLIST=$OPENDSTAR/G2/utillist
+UTILS=`curl $UTILLIST 2>/dev/null`
+cd /dstar/tools
+
+for TOOL in $UTILS; do
+   echo `date` "Downloading: $TOOL" | tee -a $LOGF
+   curl -O $OPENDSTAR/G2/$TOOL 2>/dev/null
+   chmod 755 $TOOL
+done
+
+#
+# Install dstargateway.org certificate
+#
+echo `date` "Installing certificate for dstargateway.org" | tee -a $LOGF
+
+cd /tmp
+$CURL -O $OPENDSTAR/../.admins/.certs/dsgw-cert-install-G3.tgz 2>> $LOGF | tee -a $LOGF
+if [ ! -f /etc/pki/tls/certs/dstargateway.org.crt ] ; then
+    cp /etc/pki/tls/certs/localhost.crt /etc/pki/tls/certs/localhost.crt.pre-dstar
+    cp /etc/pki/tls/private/localhost.key /etc/pki/tls/private/localhost.key.pre-dstar
+fi
+cd /etc/pki/tls
+tar xzf /tmp/dsgw-cert-install-G3.tgz
+cp /etc/pki/tls/certs/dstargateway.org.crt /etc/pki/tls/certs/localhost.crt
+cp /etc/pki/tls/private/dstargatewayorg.key /etc/pki/tls/private/localhost.key
+
+# 
+# Install AE5PLs DstarMonitor Application 
+#
+
+cd /tmp
+
+if [ -d $DSM_DIR ]; then
+    echo `date` "Moving $DSM_DIR to $DSM_BAK ... " | tee -a $LOGF
+    mv $DSM_DIR $DSM_BAK
+fi
+
+mkdir -p $DSM_DIR
+
+if [ "$RECONFIG" == "true" ]; then
+    echo `date` "Using $DSM_PROP from $DSM_BAK" | tee -a $LOGF
+    cp -p $DSM_BAK/$DSM_PROP $DSM_DIR/.
+else
+    cd /tmp
+    mv -f opt opt.prev >> $LOGF 2>&1
+    /bin/tar -xzf $BACKUP $DSM_CONF >> $LOGF 2>&1
+    if [ "$?" == "0" ]; then
+	echo `date` "Copying G2 $DSM_PROP to $DSM_CONF" | tee -a $LOGF
+	cp -p opt/dstarmon/$DSM_PROP $DSM_CONF
+    else
+	echo `date` "$DSM_PROP not found in backup, manual installation required" | tee -a $LOGF
+	$CURL -O $DSYNC/G3/dsm_configurator >> $LOGF 2>&1
+	$CURL $DSYNC/G3/dsm.template > $DSM_CONF 2>> $LOGF
+	/bin/bash ./dsm_configurator
+    fi
+fi
+
+echo `date` "Downloading DstarMonitor distribution ..." | tee -a $LOGF
+curl -O $DSYNC/$DSMTAR 2>/dev/null
+
+if [ "$?" != "0" ]; then
+    echo "Failure downloading $DSMTAR" | tee -a $LOGF
+fi
+
+tar -xzvf /tmp/$DSMTAR -C $DSM_DIR >> $LOGF 2>&1
+
+if [ -f $DSM_CONF ]; then
+
+    echo `date` "Updating GWIntf to $ZR_ETHIFNAME" | tee -a $LOGF
+    /bin/sed -i -e "s/^GWIntf.*=.*/GWIntf=$ZR_ETHIFNAME/" $DSM_CONF
+
+    echo `date` "Updating CtrlrIP to $ZR_IP" | tee -a $LOGF
+    /bin/sed -i -e "s/^CtrlrIP.*=.*/CtrlrIP=$ZR_IP/" $DSM_CONF
+
+    echo `date` "Updating Callsign to $ZR_CALLSIGN" | tee -a $LOGF
+    /bin/sed -i -e "s/^callsign.*=.*/callsign=$ZR_CALLSIGN/" $DSM_CONF
+
+    echo `date` "Installing dsm4_init script... " | tee -a $LOGF
+    $CURL $DSYNC/$DSM_INIT > /etc/init.d/dsm 2>/dev/null
+    /bin/chmod 755 /etc/init.d/dsm
+    /sbin/chkconfig --add dsm
+
+    echo `date` "DStarMonitor Installation Complete" | tee -a $LOGF
+else
+    echo `date` "No $DSM_PROP configuration found, manual installation required" | tee -a $LOGF
+    $CURL -O $DSYNC/G3/dsm_configurator >> $LOGF 2>&1
+    $CURL $DSYNC/G3/dsm.template > $DSM_CONF 2>> $LOGF
+    /bin/bash ./dsm_configurator
+fi
+
+echo
+echo `date` "**** ICOM G3 Installation Complete ****" | tee -a $LOGF
+echo
+
+#
+# Update Dsync gateway status
+#
+
+$SCR_PATH/$SCHED -d >> $LOGF 2>&1
+$SCR_PATH/$SCHED -d >> $LOGF 2>&1
+
+#
+# Notfiy DSync of installation 
+#
+
+$CURL $UPDATE_URL \
+    -d gateway_call="$ZR_CALLSIGN" \
+    -d datetime="$DATE" \
+    -d status="G3 Gateway Installed" \
+    -d trust="$TRUST_SERVER" \
+    -d notify_em="$RECONFIG" \
+    -d version="$0 $VERSION<br>$KERNEL" > /dev/null 2>&1
+
+#
+# Cleanup
+#
+
+rm -f /tmp/dstarmonitor43.tar.gz
+rm -f /tmp/dsgw-cert-install-G3.tgz
+rm -f /tmp/dplus-web-ulf.tgz
+rm -f /tmp/dplus-install-g2.sh
+rm -rf /tmp/dstar
+rm -f /tmp/dstarmonitor.properties
+rm -f /tmp/dstar_gw.db
+
+#
+# Reboot
+#
+
+/bin/echo -n "Gateway server must be rebooted now, press <RETURN> to reboot "
+read OKAY
+
+echo "Rebooting!"
+/usr/sbin/reboot
+exit
+

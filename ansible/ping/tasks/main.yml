@@ -1,6 +1,4 @@
 ---
-- name: identify domains being configured
-  debug:
-      msg: "{{ item }}"
-  with_items: "{{ domains }}"
+- name: test connectivity
+  ansible.builtin.ping:
 

@@ -1,0 +1,55 @@
+---
+- name: ensure postfix is installed
+  yum:
+    name: 
+      - postfix
+      - mailx
+      - cyrus-sasl-plain
+    state: installed
+
+- name: configure sasl
+
+  ansible.builtin.blockinfile:
+    path: /etc/postfix/main.cf
+    block: |
+      myhostname = ke5rcs.dstargateway.org
+      relayhost = [smtp.gmail.com]:587
+      smtp_sasl_auth_enable = yes
+      smtp_use_tls = yes
+      smtp_sasl_security_options = noanonymous
+      smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+      smtp_tls_security_level = encrypt
+      smtp_tls_CAfile = /etc/ssl/certs/ca-bundle.crt
+    insertafter: "EOF"
+
+- name: create sasl password directory
+  ansible.builtin.file:
+    path: /etc/postfix/sasl
+    state: directory
+    mode: '0644'
+
+- name: create password file
+  ansible.builtin.file:
+    path: /etc/postfix/sasl/sasl_passwd
+    state: touch
+    mode: '0644'
+
+- name: add gmail credentials
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/sasl/sasl_passwd
+    line: '[smtp.gmail.com]:5887 {{gmail_user }}@gmail.com:{{ gmail_passwd }}'
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: ceate hash database file
+  ansible.builtin.command: postmap /etc/postfix/sasl/sasl_passwd
+
+
+- name: protect password database file
+  ansible.builtin.file:
+    path: /etc/postfix/sasl/sasl_passwd.db
+    state: touch
+    owner: root
+    group: root
+    mode: '0600'

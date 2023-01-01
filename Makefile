@@ -23,8 +23,8 @@ book:
 	jb build book
 	cp -R book/_build/html/* docs
 
-.PHONY: ping
-ping:
+.PHONY: setup
+setup:
 	cd ansible && \
 		ansible-playbook -vv site.yml --ask-become-pass
 	

@@ -1,0 +1,548 @@
+#!/bin/bash
+#
+# Combined Icom G2 Patch Script "g2_updates"
+# 21-Nov-2012 | NJ6N | Combined updates 1-4 and patches 1-3 into one script that can be run again anytime
+# 02-Feb-2014 | NJ6N | Add override for eth0 - for rebuilding and testing gateways on other networks
+# version 1.0
+# 
+ETH0=10.0.0.1
+if [ "$1" == "-e" ]; then
+    ETH0=$2
+fi
+
+KERNEL=`/bin/uname -r`;
+DSYNC=http://dsync.dstar.info
+UPDATE_URL=$DSYNC/dsync.php
+CURL="/usr/bin/curl --connect-timeout 45 --max-time 360"
+BACKDIR=/dstar/backups
+DSTARGW=/opt/products/dstar/dstar_gw
+DSIPSVD=$DSTARGW/dsipsvd/dsipsvd
+DSGWD=$DSTARGW/dsgwd/dsgwd
+DSGWDCONF=$DSTARGW/dsgwd/dsgwd.conf
+DBDELREC=$DSTARGW/dsipsvd/dbdelrec
+DSICONF=$DSTARGW/dsipsvd/dsipsvd.conf
+IPCHK=$DSTARGW/dsipsvd/ipchk.sh
+PGCONF=/opt/products/dstar/pgsql/data/postgresql.conf
+LIB=/opt/products/dstar/pgsql/lib
+SCR_PATH=/dstar/scripts
+SCHED=gw_schedule
+UPDATER=update_scripts_g2
+DSGWINI=/etc/init.d/dstar_gw
+DSTAR_LD_CONF=/etc/ld.so.conf.d/dstar.conf
+CLASSNAME=MyFieldChecks.class
+CL_PATH=/opt/products/dstar/tomcat/webapps/D-STAR/WEB-INF/classes/jp/co/icom/dstar/com/utl/
+TOOLS=/dstar/tools
+IPPORTTEST=IPPortTestClient.bin
+OPENDSTAR=http://www.opendstar.org/tools/
+CWD=`/bin/pwd`
+DATE=`date -u "+%y%m%d-%H%M%S"`
+LOGF=/tmp/g2_updates-$DATE.log
+
+if [ ! -d $CL_PATH ]; then
+    echo "Aborting, this script is for Icom G2 gateways only."
+    exit
+fi
+
+
+#
+# Command locations
+#
+SERVICE=/sbin/service
+MD5SUM=/usr/bin/md5sum
+#
+# MD5 sums of installed files
+#
+# gw_schedule script
+SUM1=608ecb4fc5232b0a6066516e899c2a33
+
+# crontab
+SUM2=e4d600ca3bfdf959d16f2f4709d9fdc6
+
+# IPCheck Script
+SUM3=f9ec633476ba529f9f50ee25962b8d57
+
+# postgres config
+SUM4=e08928a6a1c08d88186ae68349eff059
+
+# Script updater
+SUM5=55757e4ba07e07a4eee35c69a8bd728a
+
+# g2_daemons.tgz
+SUM6=ead855bcd9bbdbfc80cec0d4b4152fe0
+
+if [ $EUID != 0 ] ; then
+    echo "Update script must be run as root.  Aborting!" | tee -a $LOGF
+    exit
+fi
+
+#
+# functions
+# 
+
+function key_val () {
+    VAR=$1
+    FILE=$2
+    local VAL=`egrep -e ^$VAR $FILE | sed -e 's/ //g' | awk -F"=" '{print $2}' |sed -e 's/\r//'`;
+    echo $VAL
+}
+
+update_file () {
+    URL=$1
+    FILE=$2
+    INSTLOC=$3
+    SUM=$4
+
+    cd /tmp
+    echo -n `date` "Downloading $FILE ..." | tee -a $LOGF
+    $CURL -O $URL/$FILE 2>/dev/null
+    if [ $? != 0 ]; then
+	echo `date` "Error downloading $FILE from $URL, aborting." | tee -a $LOGF
+	exit
+    else
+	echo "[OK]" | tee -a $LOGF
+    fi
+    echo -n `date` "Verifying $FILE ... " | tee -a $LOGF
+    VERIFY_SUM=`/usr/bin/md5sum ./$FILE | awk '{print $1}'`
+    if [ $VERIFY_SUM != $SUM ]; then
+	echo | tee -a $LOGF
+	echo `date` "## Invalid MD5 checksum for: $FILE, Aborting." | tee -a $LOGF
+	exit;
+    else
+	echo "[OK]" | tee -a $LOGF
+	echo -n `date` "Copying $FILE to $INSTLOC ..." | tee -a $LOGF
+	mv -f $FILE $INSTLOC
+	if [ $? != 0 ]; then
+	    echo `date` "Error Copying File, Aborting!" | tee -a $LOGF
+	    exit
+	else
+	    echo "[OK]" | tee -a $LOGF
+	fi
+	echo -n `date` "Expanding $INSTLOC ..." | tee -a $LOGF
+	/bin/gunzip -f $INSTLOC 2>/dev/null
+	echo "[OK]" | tee -a $LOGF
+    fi
+}
+
+stop () {
+
+#
+# Stop the gateway...
+#
+    echo -n `date` "Stopping ALL G2 Gateway Services ... " | tee -a $LOGF
+
+    $SERVICE dstar_gw stop > /dev/null 2>&1
+    sleep 2
+    $SERVICE dstar_gw stop > /dev/null 2>&1
+
+    if [ -f /etc/init.d/dplus ]; then
+	$SERVICE dplus stop > /dev/null 2>&1
+    fi
+    
+    if [ -f /etc/init.d/dsm ]; then
+	$SERVICE dsm stop > /dev/null 2>&1
+    fi
+    
+    if [ -f /etc/init.d/dssecd ]; then
+	$SERVICE dssecd stop > /dev/null 2>&1
+    fi
+
+    echo "[OK]" | tee -a $LOGF
+}
+
+start () {
+
+#
+# Restart everything
+#
+    echo -n `date` "Starting Gateway Applications... " | tee -a $LOGF
+    
+    if [ -f /etc/init.d/dplus ]; then
+	$SERVICE dplus start > /dev/null 2>&1
+    fi
+    
+    if [ -f /etc/init.d/dsm ]; then
+	$SERVICE dsm start > /dev/null 2>&1
+    fi
+    
+    if [ -f /etc/init.d/dssecd ]; then
+	$SERVICE dssecd start > /dev/null 2>&1
+    fi
+    
+    $SERVICE dstar_gw start > /dev/null 2>&1
+    if [ $? == 0 ]; then
+	echo "[OK]" | tee -a $LOGF
+    else
+	echo "[FAILED]" | tee -a $LOGF
+    fi
+}
+
+#
+# Start the update
+# 
+echo `date` "$0 Starting, Log file = $LOGF"
+
+#
+# Create backup directory and make backup copies
+# 
+
+echo `date` "Creating Backups directory: $BACKDIR" | tee -a $LOGF
+mkdir -p $BACKDIR
+echo `date` "Backing up current applications and configuration files." | tee -a $LOGF
+
+cp -p $DSGWDCONF $BACKDIR/dsgwd.conf.$DATE
+cp -p $DSICONF $BACKDIR/dsipsvd.conf.$DATE
+cp -p $DSGWINI $BACKDIR/dstar_gw.$DATE
+cp -p $DSIPSVD $BACKDIR/dsipsvd.$DATE
+cp -p $DSGWD $BACKDIR/dsgwd.$DATE
+cp -p $DBDELREC $BACKDIR/dbdelrec.$DATE
+/usr/bin/crontab -u root -l > $BACKDIR/crontab.$DATE
+cp -p $IPCHK $BACKDIR/ipchk.sh.$DATE
+cp -p $PGCONF $BACKDIR/postgresql.conf.$DATE
+
+#
+# Validate configuration files
+#
+
+#
+# ZR_CALLSIGN in dsipsvd.conf
+# 
+ZR_CALLSIGN=$(key_val ZR_CALLSIGN $DSICONF)
+
+if [ "X$ZR_CALLSIGN" == "X" ] || [ "$ZR_CALLSIGN" == "XXXXXX" ]; then
+    echo `date` "Invalid or Missing ZR_CALLSIGN in $DSICONF!" | tee -a $LOGF
+    ZR_CALLSIGN=""
+    while [ "X$ZR_CALLSIGN" == "X" ]; do
+     echo | tee -a $LOGF
+     echo -n "Please enter repeater call sign, without module, e.g. AB9CDE (enter Q to quit): " | tee -a $LOGF
+     read ZR_CALLSIGN
+     if [ "$ZR_CALLSIGN" == "Q" ] || [ "$ZR_CALLSIGN" == "q" ]; then
+	 exit
+     elif [ "X$ZR_CALLSIGN" == "X" ]; then
+	 echo | tee -a $LOGF
+	 echo " Gateway Call Sign MUST be specified!" | tee -a $LOGF
+     fi
+    done
+    ZR_CALLSIGN=`echo $ZR_CALLSIGN | tr [a-z] [A-Z]` | tee -a $LOGF
+    echo `date` "Setting ZR_CALLSIGN = $ZR_CALLSIGN in $DSICONF" | tee -a $LOGF
+    /bin/sed -i -e "s/^ZR_CALLSIGN.*=.*/ZR_CALLSIGN=$ZR_CALLSIGN/" $DSICONF
+else
+    echo `date` "DSIPSVD Gateway Call is: $ZR_CALLSIGN" | tee -a $LOGF
+fi
+
+#
+# TRUST_SERVER in dsipsvd.conf
+# 
+
+TRUST_SERVER=$(key_val TRUST_SERVER $DSICONF)
+TRUST_SERVER=`echo $TRUST_SERVER | tr [A-Z] [a-z]` | tee -a $LOGF
+if [ "$TRUST_SERVER" != "usroot.dstarusers.org" ]; then
+    echo `date` "Invalid TRUST_SERVER ($TRUST_SERVER) in $DSICONF!" | tee -a $LOGF
+    echo `date` "Setting TRUST_SERVER = usroot.dstarusers.org in $DSICONF" | tee -a $LOGF
+    /bin/sed -i -e "s/^TRUST_SERVER.*=.*/TRUST_SERVER=usroot.dstarusers.org/" $DSICONF
+else
+    echo `date` "Valid TRUST_SERVER: $TRUST_SERVER" | tee -a $LOGF
+fi
+
+#
+# DNS_ADDR in dsgwd.conf
+#
+
+DNS_ADDR=$(key_val DNS_ADDR $DSGWDCONF)
+
+if [ "$DNS_ADDR" != "$ETH0" ]; then
+    echo `date` "Invalid DNS_ADDR = $DNS_ADDR in $DSGWDCONF" | tee -a $LOGF
+    echo `date` "Setting DNS_ADDR = $ETH0 in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/DNS_ADDR.*=.*/DNS_ADDR=$ETH0/" $DSGWDCONF
+else
+    echo `date` "Valid DNS_ADDR: $DNS_ADDR" | tee -a $LOGF
+fi
+
+#
+# DNS_MAC in dsgwd.conf
+#
+
+DNS_MAC=$(key_val DNS_MAC $DSGWDCONF)
+ARP_ENTRY=`/sbin/arp -en $ETH0 | grep $ETH0 | awk '{print $3}' | sed s/:/-/g`;
+LEN=${#ARP_ENTRY}
+
+if [ "X$ARP_ENTRY" == "X" ] || [ "$LEN" != "17" ]; then
+    echo `date` "Unable to determine MAC address for $ETH0, aborting!" | tee -a $LOGF
+    exit
+fi
+
+if [ "$DNS_MAC" != "$ARP_ENTRY" ]; then
+    echo `date` "Invalid DNS_MAC = $DNS_MAC in $DSGWDCONF" | tee -a $LOGF
+    echo `date` "Setting DNS_MAC = $ARP_ENTRY in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/DNS_MAC.*=.*/DNS_MAC=$ARP_ENTRY/" $DSGWDCONF
+else
+    echo `date` "Valid DNS_MAC: $DNS_MAC = $ARP_ENTRY" | tee -a $LOGF
+fi
+
+#
+# ZR_CALLSIGN in dsgwd.conf
+# 
+DSGWD_CALLSIGN=$(key_val ZR_CALLSIGN $DSGWDCONF)
+
+if [ "X$DSGWD_CALLSIGN" == "X" ] || [ "$DSGWD_CALLSIGN" == "XXXXXX" ]; then
+    echo `date` "Invalid or Missing ZR_CALLSIGN in $DSGWDCONF!" | tee -a $LOGF
+    echo `date` "Setting DSGWD ZR_CALLSIGN = $ZR_CALLSIGN in $DSGWDCONF" | tee -a $LOGF
+    /bin/sed -i -e "s/^ZR_CALLSIGN.*=.*/ZR_CALLSIGN=$ZR_CALLSIGN/" $DSGWDCONF
+else
+    echo `date` "DSGWD Gateway Call is: $DSGWD_CALLSIGN" | tee -a $LOGF
+fi
+
+#
+# If Postgres is not running, there should be no PID file.  Update dstar_gw to remove it
+#
+ 
+if ! grep --quiet "rm -f \$PGDATA/postmaster.pid" $DSGWINI; then
+    echo -n `date` "Updating: $DSGWINI to remove stale PID files upon restart ... " | tee -a $LOGF
+    sed -i '/grep \/opt\/products/a \\trm -f $PGDATA/postmaster.pid' $DSGWINI
+    echo "[OK]" | tee -a $LOGF
+else
+    echo `date` "$DSGWINI already patched." | tee -a $LOGF
+fi
+
+#
+# Install gateway scheduler script
+#
+
+echo `date` "Installing gw_schedule DSync Scheduler script:" | tee -a $LOGF
+mkdir -p $SCR_PATH
+update_file $DSYNC gw_schedule.gz $SCR_PATH/gw_schedule.gz $SUM1
+chmod 755 $SCR_PATH/$SCHED
+
+#
+# Install script updater script
+#
+echo `date` "Installing script_updater script:" | tee -a $LOGF
+update_file $DSYNC $UPDATER $SCR_PATH/$UPDATER $SUM5
+chmod 755 $SCR_PATH/$UPDATER
+
+#
+# Install new crontab
+#
+echo `date` "Replacing root crontab with standard ICOM G2 version:" | tee -a $LOGF
+update_file $DSYNC g2-crontab /tmp/crontab $SUM2
+echo `date` "Installing new crontab." | tee -a $LOGF
+crontab -u root /tmp/crontab
+
+#
+# Install updated ipchk.sh script
+#
+echo `date` "Updating ipchk.sh script with standard ICOM G2 version:" | tee -a $LOGF
+update_file $DSYNC ipchk.sh $IPCHK $SUM3
+echo `date` "Making $IPCHK executable" | tee -a $LOGF
+chmod 755 $IPCHK
+
+#
+# Postgres configuration file update
+# 
+echo `date` "Updating postgres configuration file with standard ICOM G2 version:" | tee -a $LOGF
+update_file $DSYNC postgresql.conf $PGCONF $SUM4
+
+#
+# Make sure the dstar gateway applications exist
+#
+
+echo -n `date` "Checking $DSIPSVD directory ... " | tee -a $LOGF
+if [ ! -x $DSIPSVD ]; then
+    echo "$DSIPSVD doesn't exist!" | tee -a $LOGF
+    exit
+else
+    echo "[OK]" | tee -a $LOGF
+fi
+
+echo -n `date` "Checking $DSGWD directory ..." | tee -a $LOGF
+if [ ! -x $DSGWD ]; then
+    echo "$DSGWD doesn't exist!" | tee -a $LOGF
+    exit
+else
+    echo "[OK]" | tee -a $LOGF
+fi
+
+stop
+
+#
+# Do the IP Port Test
+#
+
+echo `date` "Running IP port test to validate router port forwarding configuration:"  | tee -a $LOGF
+if [ ! -f $TOOLS/$IPPORTTEST ]; then
+    mkdir -p $TOOLS
+    cd $TOOLS
+    $CURL -O $OPENDSTAR/$IPPORTTEST > /dev/null 2>&1
+fi
+chmod 755 $TOOLS/$IPPORTTEST
+$TOOLS/$IPPORTTEST >& /tmp/porttest.log
+
+if grep --quiet FAILED /tmp/porttest.log; then
+    echo `date` "FAILED IP Port forwarding test!" | tee -a $LOGF
+    echo -e "\n\t#### You MUST correct the following port forwarding problems to continue: ####\n" | tee -a $LOGF
+    cat /tmp/porttest.log
+    start
+    /bin/stty sane
+    exit
+else
+    echo `date` "Gateway router has passed the port forwarding test" | tee -a $LOGF
+fi
+
+#
+# Download and install updated G2 applications
+#
+echo `date` "Downloading updated G2 applications:" | tee -a $LOGF
+PNAME=g2_daemons.tgz
+
+cd /tmp
+$CURL -O $DSYNC/$PNAME > /dev/null 2>&1
+    echo -n `date` "Verifying updates ... " | tee -a $LOGF
+    VERIFY_SUM=`$MD5SUM ./$PNAME | awk '{print $1}'`
+    if [ $VERIFY_SUM != $SUM6 ]; then
+    echo | tee -a $LOGF
+    echo `date` "Invalid MD5 checksum for update file, Aborting. $VERIFY_SUM != $SUM6" | tee -a $LOGF
+    exit
+else
+    echo "[OK]" | tee -a $LOGF
+fi
+
+cd $DSTARGW
+if [ $? != 0 ]; then
+    echo | tee -a $LOGF
+    echo `date` "Unable to chdir to $DSTARGW, Aborting!!" | tee -a $LOGF
+    exit
+fi
+
+echo -n `date` "Unpacking updates ... " | tee -a $LOGF
+tar -xvf /tmp/$PNAME > /dev/null 2>&1
+echo "[OK]" | tee -a $LOGF
+
+#
+# Set permissions
+#
+chmod 755 $DSIPSVD
+chown dstar:dstar $DSIPSVD
+chmod 755 $DSGWD
+chown dstar:dstar $DSGWD
+chmod 755 $DBDELREC
+chown dstar:dstar $DBDELREC
+
+#
+# Update LD Library Path
+#
+echo -n `date` "Adding $LIB to LD_LIBRARY_PATH configuration directory... " | tee -a $LOGF
+echo $LIB > $DSTAR_LD_CONF | tee -a $LOGF
+/sbin/ldconfig
+echo "[OK]" | tee -a $LOGF
+
+#
+# start everything back up
+#
+
+start
+
+# 10-28-2011  | nj6n   | Updates MyFieldChecks.class 
+#                        to do proper pc hostname validation
+# 
+
+echo -n `date` "Checking for $CL_PATH ... " | tee -a $LOGF
+
+if [ ! -d $CL_PATH ]; then
+    echo -e "\n\tERROR: $CL_PATH NOT FOUND, Aborting..." | tee -a $LOGF
+    cd $CWD
+    exit
+else 
+    echo "[OK]" | tee -a $LOGF
+fi
+
+cd $CL_PATH
+
+if [ -f $CLASSNAME ]; then
+    mv -f $CLASSNAME $CLASSNAME.$DATE
+else
+    echo `date` "WARNING: $CLASSNAME not found in $CL_PATH" | tee -a $LOGF
+fi
+
+#
+# Download the new version
+#
+
+echo -n `date` "Downloading new $CLASSNAME ... " | tee -a $LOGF
+$CURL -O $DSYNC/$CLASSNAME > /dev/null 2>&1
+
+if [ "$?" != "0" ]; then
+    echo `date` "ERROR downloading $DSYNC/$CLASSNAME, aborting." | tee -a $LOGF
+    exit
+
+else
+    echo "[OK]" | tee -a $LOGF
+fi
+
+#
+# Set permissions
+#
+chmod 755 $CLASSNAME
+
+echo `date` Checking status of \"dstar\" and \"postgres\" accounts. | tee -a $LOGF
+
+# Patch1 - NJ6N - 2010-06-15
+# Description: Disables dstar account if default password.
+#
+PW=`grep dstar /etc/shadow | awk -F: '{print $2}'`
+SHELL=`grep dstar /etc/passwd | awk -F: '{print $7}'`
+DEFPW='$1$fUg1BOWr$L6QsH9ERPyFc62CuQ7Wc41'
+CHK1=`echo $PW | /bin/gawk '{print substr($1,1,1)}'` | tee -a $LOGF
+PW2=`grep postgres /etc/shadow | awk -F: '{print $2}'`
+SHELL2=`grep postgres /etc/passwd | awk -F: '{print $7}'`
+DEFPW2='$1$cB6RNCof$zZj9C0xtiIed1rlH0G7Qi1'
+CHK2=`echo $PW2 | /bin/gawk '{print substr($1,1,1)}'` | tee -a $LOGF
+
+if [ "$CHK1" == "!" ]; then    # nothing to do
+    echo `date`  "dstar account is already de-activated, good.  Nothing done." | tee -a $LOGF
+elif [ "$SHELL" == "/sbin/nologin" ]; then    # nothing to do
+    echo `date`  "dstar account already set to /sbin/nologin, good.  Nothing done." | tee -a $LOGF
+elif [ "$PW" == "$DEFPW" ]; then              # Default password found, disable account
+    echo `date`  "dstar account has default password and is not de-activated, disabling account!" | tee -a $LOGF
+    /usr/sbin/usermod -L dstar > /dev/null 2>&1
+else                                        # Password was changed, good.
+    echo `date`  "dstar account has non default password, good.  Nothing done." | tee -a $LOGF
+fi
+
+if [ "$CHK2" == "!" ]; then    # nothing to do
+    echo `date`  "postgres account is already de-activated, good.  Nothing done." | tee -a $LOGF
+elif [ "$SHELL2" == "/sbin/nologin" ]; then    # nothing to do
+    echo `date`  "postgres account is already de-activated, good.  Nothing done." | tee -a $LOGF
+elif [ "$PW2" == "$DEFPW2" ]; then              # Default password found, disable account
+    echo `date`  "postgres account has default password and is not de-activated, disabling account!" | tee -a $LOGF
+    /usr/sbin/usermod -L postgres > /dev/null 2>&1
+else                                        # Password was changed, good.
+    echo `date`  "postgres account has non default password, good.  Nothing done." | tee -a $LOGF
+fi
+
+#
+# report to dsync site...
+#
+
+DATE=`date -u "+%F %T"`
+$CURL $UPDATE_URL \
+    -d gateway_call="$ZR_CALLSIGN" \
+    -d datetime="$DATE" \
+    -d status="Combined Updates Installed." \
+    -d trust="$TRUST_SERVER" \
+    -d notify_em="" \
+    -d version="$0 $VERSION<br>$KERNEL" > /dev/null 2>&1
+
+cd $CWD
+
+echo `date` "Updating DSync site: http://dsync.dstar.info" | tee -a $LOGF
+
+/dstar/scripts/gw_schedule -d > /dev/null 2>&1
+/dstar/scripts/gw_schedule -d > /dev/null 2>&1
+
+echo | tee -a $LOGF
+echo `date` "*** NOTE: Backups of previous configuration files, including the root crontab, can be found here: $BACKDIR ***" | tee -a $LOGF
+echo `date` "*** Important: Install local crontab entries in /etc/cron.d/{crontabname} ***"   | tee -a $LOGF
+echo -e `date` "\n\t  **** Updates Installed ****\n" | tee -a $LOGF
+
+unlink $0
+exit
+

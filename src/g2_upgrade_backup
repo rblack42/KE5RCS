@@ -1,0 +1,118 @@
+#!/bin/bash
+# g2_upgrade_backup
+#
+# D-STAR G2 Gateway Backup Script - Brian Roode, NJ6N
+# 
+# Back up G2 data in preparation of upgrade to G3 onto new CentOS 7 Linux Box
+# This script is provided without warranty of any kind.  Use at your own risk.
+# 
+# Update History 
+# 2016-Nov-04 | nj6n  | Create a backup of G2 unsync_user_mng file, etc. for import into G3
+#
+# Version 0.88
+# 
+CURL="/usr/bin/curl --connect-timeout 10 --max-time 240"
+# 
+# Path to Icom G2 configuration files
+#
+CONF='/opt/products/dstar/dstar_gw'
+
+# Log File
+LOG=/tmp/g2_upgrade_backup.log
+  
+if [ $EUID != 0 ] ; then
+    echo "Installation script must be run as root.  Aborting!" | tee -a $LOGF
+    exit
+fi
+
+
+# Determine gateway call
+GW_CALL=`egrep -e '^ZR_CALLSIGN' $CONF/dsipsvd/dsipsvd.conf | sed -e 's/ //g' | awk -F"=" '{print $2}' |sed -e 's/\r//'`
+
+echo "Creating backup of: $GW_CALL"
+echo
+
+#  Location of backup tar file
+/bin/echo -n "Enter a 4-8 character keyword (numbers and letters only) to identify this backup during the upgrade process: "
+read MYCALL
+
+if [ X"$MYCALL" == "X" ]; then
+    echo "Call sign must be specified,  Aborting."
+    exit 1
+fi
+
+BACK_TAR=$GW_CALL-$MYCALL-backup.tgz
+
+echo "Backing up to: $BACK_TAR"
+echo
+
+# Create list of DStarMonitor configuration file(s)
+PROP=`find /opt/dstarmon -name dstarmonitor.properties`
+
+# Create list of all configuration files in the /opt directory (dsipsvd, dsgwd, etc.)
+OPTCFG=`find /opt -name \*.conf -print -o -name agree\* -print`
+
+# This can be used with a companion script to post the backup file to a web server
+BACKUP_URL='https://nj6n.com/g2_backup/'
+
+# Temporary location to place the postgres backups
+PG_BACKUP=/dstar/backups
+
+# Create the postgres backup location, set ownership and group write permissions
+mkdir -p $PG_BACKUP
+chgrp postgres $PG_BACKUP
+chmod g+w $PG_BACKUP
+
+# Current date and time stamp
+DATE=`date +"%y%m%d_%H%M%S"`
+#
+# Remove any previous backups that might exist
+rm -f $PG_BACKUP/*.csv
+
+# Create backups of local database tables
+su - postgres -c "
+cat << EOS | psql -U dstar dstar_global >/dev/null 2>&1
+  COPY unsync_multicast_mng TO '$PG_BACKUP/unsync_multicast_mng.$DATE.csv' DELIMITER ',';
+  COPY unsync_user_mng TO '$PG_BACKUP/unsync_user_mng.$DATE.csv' DELIMITER ',';
+  \q
+EOS
+"
+# if the /dstar directory exists, and it SHOULD exist, back up .conf and .dv files.
+if [ -d /dstar ]; then
+    DPLUS=`find /dstar -name \*.conf -print -o -name \*.dv* -size -10k -print`
+else
+    DPLUS=''
+fi
+
+# Create the tar file
+echo `date` "Backing up files for $GW_CALL ..." > $LOG
+cd /tmp
+tar -zPvcf /tmp/$BACK_TAR $PROP $OPTCFG $DPLUS $PG_BACKUP >> $LOG 2>&1
+#
+# Remove the Postgres CSV files
+# 
+rm -f $PG_BACKUP/*.csv
+
+# Optionally the tar file can be sent to a web server if one is set up to receive.
+#
+echo -n 'Okay to send copy of backup to NJ6Ns web server for restoration during upgrade phase?: [Y/n]: '
+read SENDBACKUP
+if [ "$SENDBACKUP" != "n" ] && [ "$SENDBACKUP" != "N" ]; then
+    echo "Sending backup... "
+    echo
+    $CURL -F gw=$GW_CALL -F uploadedfile=@$BACK_TAR -F submit=Upload $BACKUP_URL
+    if [ "$?" == "0" ]; then
+	echo "Backup File: $BACK_TAR has been sent to remote server for G3 upgrade process."
+	echo ""
+	echo "There is a copy of this file in /tmp for you to keep as a backup copy."
+	echo "Please note - this is NOT a full system backup - you may wish to keep the current disk as a backup, or make a backup copy before erasing."
+	echo
+    fi
+else
+    echo -e "\n### Backup not sent ####\n\n\tBe sure to copy: /tmp/$BACK_TAR to a thumb drive or another computer for use during G3 upgrade."
+    echo
+fi
+
+exit
+
+
