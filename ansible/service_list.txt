@@ -1,0 +1,11 @@
+# D-Star Service List
+
+- dplus
+- dsm
+- dstar_gw
+- postgresql-14
+- postfix
+- sshd
+- tomcat
+- httpd
+- crond

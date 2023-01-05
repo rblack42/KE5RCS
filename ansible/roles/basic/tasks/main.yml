@@ -1,0 +1,11 @@
+---
+- name: install basic apps
+  yum:
+    name: 
+      - git
+      - httpd
+      - tomcat
+      - postgresql
+      - postgresql-server
+      - openssl
+    state: present

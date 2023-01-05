@@ -1,0 +1,7 @@
+---
+- name: list running services
+  service_facts:
+
+- name: Show Service Facts
+  debug:
+    msg: "{{ ansible_facts.services }}"

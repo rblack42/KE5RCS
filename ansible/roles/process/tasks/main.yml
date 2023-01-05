@@ -1,0 +1,9 @@
+---
+- name: check running services
+  ansible.builtin.service:
+    name: 
+      - DSM
+      - dplusd
+      - sshd
+      - postgres
+

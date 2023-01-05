@@ -1,0 +1,47 @@
+---
+- name: install macvim
+  yum:
+    name: vim
+    state: present
+
+- name: install editorconfig
+  git:
+    repo: https://github.com/editorconfig/editorconfig-vim.git
+    dest: /home/{{ dstar_user }}/.vim/bundle/editorconfig-vim 
+
+- name: install Vundle
+  git:
+    repo: https://github.com/VundleVim/Vundle.vim.git
+    dest: /home/{{ dstar_user }}/.vim/bundle/Vundle.vim
+
+- name: install solarized
+  git:
+    repo: https://github.com/altercation/vim-colors-solarized.git
+    dest: /home/{{ dstar_user }}/_github/vim-colors-solarized
+
+- name: create colors directory
+  file:
+    path: /home/{{ dstar_user }}/.vim/colors
+    state: directory
+
+- name: set colors in place
+  command: \
+    cp /home/{{ dstar_user }}/_github/vim-colors-solarized/colors/solarized.vim \
+      /home/{{ dstar_user }}/.vim/colors/solarized.vim
+
+- name: install vimrc
+  template:
+    src: vimrc.j2
+    dest: /home/{{ dstar_user }}/.vimrc
+    mode: "0644"
+  notify: install macvim plugins
+
+- name: install user .editorcfg
+  template:
+    src: editorconfig.j2
+    dest: /home/{{ dstar_user }}/.editorconfig
+
+- name: change ownershio of user home
+  command: |
+    chown -R {{dstar_user }}:{{ dstar_user }} /home/{{ dstar_user }}
+

@@ -1,0 +1,11 @@
+---
+plugins:
+  - editorconfig/editorconfig-vim
+  - micha/vim-colors-solarized
+
+settings:
+  - 'tabstop=4'
+  - 'shiftwidth=4'
+  - 'spell'
+  - 'spelllang=en'
+  - 'number'

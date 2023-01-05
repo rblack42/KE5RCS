@@ -1,3 +1,3 @@
 [servers]
-ke5rcs 
+ke5rcs.dstargateway.org ansible_port=5224 ansible_user=n5ujh
 

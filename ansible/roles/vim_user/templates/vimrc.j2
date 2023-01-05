@@ -1,0 +1,24 @@
+set nocompatible
+filetype off
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+
+{% for item in plugins %}
+Bundle "{{ item }}"
+{% endfor %}
+
+call vundle#end()
+
+filetype plugin indent on
+syntax enable
+
+set background=light
+colorscheme solarized
+
+{% for item in settings %}
+set {{ item }}
+{% endfor %}
+
+map q gq}

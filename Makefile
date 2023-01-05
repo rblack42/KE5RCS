@@ -27,4 +27,13 @@ book:
 setup:
 	cd ansible && \
 		ansible-playbook -vv site.yml --ask-become-pass
-	
+
+.PHONY: check
+check:
+	cd ansible && \
+		ansible-playbook -vv check.yml --ask-become-pass
+
+.PHONY: services
+services:
+	cd ansible && \
+		ansible-playbook -vv services.yml --ask-become-pass

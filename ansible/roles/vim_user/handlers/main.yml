@@ -1,0 +1,3 @@
+---
+- name: restart postfix
+  command: systemctl restart postfix

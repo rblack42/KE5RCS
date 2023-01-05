@@ -1,0 +1,6 @@
+---
+- name: check hardware status
+  ansible.builtin.setup:
+    gather_subset:
+      - 'processor'
+      - 'all_ipv4_addresses'

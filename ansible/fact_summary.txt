@@ -1,0 +1,57 @@
+ansible_facts
+	ansible_date_time
+		weekday
+		date
+		hour
+		minute
+		second
+
+	ansible_devices
+		sda
+			model
+			partitions
+				sda1
+					size
+				sda2
+					size
+
+	ansible_distribution
+	ansible_distribution_major-version
+	ansible_distribution_version
+
+	ansible_enp5s0
+		ipv4
+			address
+			broadcast
+			netmask
+			prefix
+		macaddress
+		speed
+
+	ansible_enp6s0
+		ipv4
+			address
+			broadcast
+			netmask
+			prefix
+		macaddress
+		speed
+	ansible_env
+		USER
+	ansible_maemory_mb
+		real
+			free
+			used
+		swap
+			free
+			total
+	ansible_nodenameansible_sysstem_vendor'
+	ansible_processor
+	ansible_processor_cores
+	ansible_product_name
+	ansible_system_vendor
+	ansible_uptime_seconds
+	ansible_userspace_architecture
+
+
+		
