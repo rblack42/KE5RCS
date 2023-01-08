@@ -1,0 +1,48 @@
+---
+- name: install webmin dependencies
+  yum:
+    name:
+      - perl 
+      - perl-Net-SSLeay 
+      - openssl 
+      - perl-IO-Tty 
+      - perl-Encode-Detect
+      - wget
+    state: present
+  become: yes
+
+- name: create yum repo file
+  file:
+    path: /etc/yum.repos.d/webmin.repo
+    state: touch
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+
+- name: update yum repos
+  ansible.builtin.blockinfile:
+    path: /etc/yum.repos.d/webmin.repo
+    block: |
+      [Webmin]
+      name=Webmin Distribution Neutral
+      #baseurl=http://download.webmin.com/download/yum
+      mirrorlist=http://download.webmin.com/download/yum/mirrorlist
+      enabled=1
+      insertafter: "EOF"
+  become: yes
+
+- name: fetch webmin PGP key
+  command: wget http://www.webmin.com/jcameron-key.asc
+  become: yes
+
+- name: install PGP key
+  command: rpm --import jcameron-key.asc
+  become: yes
+
+- name: install webmin
+  yum:
+    name:
+      - webmin
+    state: present
+  become: yes

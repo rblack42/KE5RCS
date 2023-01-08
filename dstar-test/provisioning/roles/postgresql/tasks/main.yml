@@ -1,0 +1,35 @@
+---
+- name: download required version of postgresql
+  command: wget {{ postgresql_repo|quote }}/{{ postgresql_rpm|quote }}
+
+- name: install postgresql
+  yum:
+    name: "{{ postgresql_rpm }}"
+    state: present
+  become: yes
+
+- name: install posgrresql server
+  yum:
+    name: "{{ postgresql_server }}"
+
+- name: install postgres client
+  yum:
+    name: postgresql14
+    state: present
+  become: yes
+
+- name: initialize database
+  command: /usr/pgsql-14/bin/postgresql-14-setup initdb
+  become: yes
+
+- name: create service link
+  command: systemctl enable --now postgresql-14
+  become: yes
+
+- name: configure postgresql service
+  service:
+    name: "{{ postgresql_service }}"
+    state: started
+    enabled: true
+
+

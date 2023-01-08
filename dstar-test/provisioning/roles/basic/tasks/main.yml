@@ -1,0 +1,29 @@
+---
+- name: install  basic tools
+  yum:
+    name: 
+      - wget
+      - libX11
+      - libXt
+      - libXext
+      - libXmu
+    state: present
+  become: yes
+      
+- name: install dstar tools
+  yum:
+    name:
+      - policycoreutils-python
+      - glib2.i686
+      - net-tools
+      - openssl098e.i686
+      - openssl-libs.i686
+      - libpcap
+      - postgresql-libs.i686
+  become: yes
+
+- name: set timezone
+  timezone:
+    name: "{{ ntp_timezone }}"
+  become: yes
+  notify: restart cron

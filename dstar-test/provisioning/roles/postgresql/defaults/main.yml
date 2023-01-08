@@ -1,0 +1,7 @@
+---
+postgresql_user: postgres
+postgresql_group: postgres
+postgresql_repo: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64
+postgresql_rpm: pgdg-redhat-repo-latest.noarch.rpm
+postgresql_server: postgresql14-server
+postgresql_service: postgresql-14

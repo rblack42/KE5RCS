@@ -1,0 +1,13 @@
+---
+- name: Ensure ntpd is installed
+  yum:
+    name: 
+      - ntp
+    state: present
+      
+- name: set timezone
+  timezone:
+    name: "{{ ntp_timezone }}"
+  become: yes
+  notify: restart cron
+    

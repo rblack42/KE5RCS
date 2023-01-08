@@ -10,3 +10,11 @@ __pycache__
 **/_build
 **/.ipynb_checkpoints
 **/unpublished
+
+# Vagrant
+.vagrant
+
+# Vin
+*~
+*.swp
+
